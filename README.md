@@ -1,3 +1,3 @@
-# sebablasko.github.io
+# Blasco.cl
 
-Sitio web personal
+Sebastián Blasco
