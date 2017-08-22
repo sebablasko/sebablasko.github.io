@@ -1,3 +1,0 @@
-# Blasco.cl
-
-Sebastián Blasco
