@@ -17,30 +17,52 @@
 
     <style>
         img.social_logo {
-            height: 60px;
+            height: 40px;
             fill: red;
+        }
+
+        changeBlue:hover {
+            fill: blue;
         }
     </style>
 </head>
 
 <body>
     <br>
-
-
     <div class="container">
         <div class="jumbotron">
             <div class="col">
-                <h1 class="display-3">Sebastián R. Blasco V.</h1>
+                <div class="row">
+                    <div class="col-9">
+                        <h1 class="display-3">S.R. Blasco V.</h1>
+                        <p class="lead">
+                            Sebastián Ramón Blasco Valencia.
+                        </p>
+                    </div>
+                    <div class="col-2">
+                        <img src="img/me.jpg" class="rounded img-thumbnail profile">
+                    </div>
+
+                </div>
+
                 <hr class="my-4">
                 <p class="lead">Hola!</p>
-                <p class="lead">Soy ingeniero civil en computación, actividad a la que me <abbr title="Felizmente :)">dedico a diario</abbr>. Me muevo en <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjwhRE9DVFlQRSBzdmcgIFBVQkxJQyAnLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4nICAnaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkJz48c3ZnIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDQ4IDQ4IiBoZWlnaHQ9IjQ4cHgiIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDQ4IDQ4IiB3aWR0aD0iNDhweCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+PGcgaWQ9IkxheWVyXzQiPjxwYXRoIGQ9Ik0zOC42NDEsMTguNDg3bC0xLjAzMy02LjExM3YtMC4xNjVsLTAuMTE3LTAuNzY1bC0wLjIxNi0xLjEwNmgtNi42NjJ2Mi41NDFoNS4wNTZsMC4zOCwyLjI1NmgtMy45MDEgICBsLTguMDA4LDEwLjYwMWwtNS4yNTYtOC4wNjFoMi41MnYtMy4xOThoLTcuOTk0djMuMTk4aDIuNDAxbC0xLjIxMSwyLjIwOGMtMS40NTUtMC44ODYtMy4xNTgtMS40MDgtNC45ODctMS40MDggICBjLTUuMjk4LDAtOS41OTMsNC4yOTUtOS41OTMsOS41OTFjMCw1LjMwMSw0LjI5NSw5LjU5Niw5LjU5Myw5LjU5NmM1LjAyLDAsOS4xMzItMy44NTcsOS41NTEtOC43NzFIMjR2LTAuMDI1bDAuMDIxLTAuMDI1ICAgbDAuMDMzLDAuMDQ3bDAuMDE1LDAuMDJsOC40ODUtMTEuMjMxaDMuOTI2bDAuMTYsMC45NjZjLTQuNDU5LDAuODIzLTcuODQzLDQuNzI3LTcuODQzLDkuNDI1YzAsNS4zMDEsNC4yOTYsOS41OTYsOS41OTMsOS41OTYgICBjNS4yOTgsMCw5LjU5NC00LjI5NSw5LjU5NC05LjU5NkM0Ny45ODIsMjIuODU1LDQzLjgyMSwxOC42MjIsMzguNjQxLDE4LjQ4N3ogTTE1LjAyMSwyMy4zNzFjMC44NDIsMC45NzEsMS40MzQsMi4xNTMsMS42NiwzLjQ3MyAgIGgtMy41NjdMMTUuMDIxLDIzLjM3MXogTTkuNjExLDM1LjI2Yy0zLjk3NCwwLTcuMTk1LTMuMjE3LTcuMTk1LTcuMTkzYzAtMy45NzIsMy4yMjItNy4xOTMsNy4xOTUtNy4xOTMgICBjMS40MTEsMCwyLjcxNiwwLjQyMSwzLjgyNywxLjEyMmwtMi42NTksNC44NDloLTAuMDAybC0xLjEyNCwyLjA0N2wwLDBsLTAuMDA3LDAuMDE2bDIuMzQzLTAuMDEybDAuMDAxLTAuMDA0aDQuNzMxICAgQzE2LjMwOCwzMi40NzMsMTMuMzAyLDM1LjI2LDkuNjExLDM1LjI2eiBNMTkuMTE4LDI2Ljg0NGMtMC4yODUtMi4yMy0xLjMzMS00LjIxOC0yLjg3Ni01LjY5OGwxLjIyOS0yLjIzNmw1LjE3Myw3LjkzNUgxOS4xMTh6ICAgIE0zOC4zODksMzUuMjZjLTMuOTc0LDAtNy4xOTMtMy4yMTctNy4xOTMtNy4xOTNjMC0zLjUxLDIuNTItNi40MjQsNS44NDQtNy4wNTdsMS4zMzQsNy44ODFsMS45NjktMC4zM2wtMS4yODctNy42MjEgICBjMy42NTcsMC4zNDIsNi41MywzLjM4Myw2LjUzLDcuMTI3QzQ1LjU4NSwzMi4wNDMsNDIuMzYzLDM1LjI2LDM4LjM4OSwzNS4yNnoiIGZpbGw9IiMyNDFGMjAiLz48L2c+PC9zdmc+"></p>
-                <p class="lead">Estudié en la Universidad de Chile, donde también cursé un magister en ciencias mención computación, realizando mi tesis al alero de <a href="http://www.niclabs.cl" target="_blank">NICLabs</a>. Actualmente me desempeño como ingeniero de software en <a href="http://www.geoinnova.cl" target="_blank">Geoinnova</a>. Un relato más extenso sobre mi vida está disponible en mi perfil de linkedin más abajo.</p>
+                <p class="lead">Soy ingeniero civil en computación, actividad a la que me
+                    <abbr title="Felizmente :)">dedico a diario</abbr>. Me muevo en
+                    <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjwhRE9DVFlQRSBzdmcgIFBVQkxJQyAnLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4nICAnaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkJz48c3ZnIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDQ4IDQ4IiBoZWlnaHQ9IjQ4cHgiIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDQ4IDQ4IiB3aWR0aD0iNDhweCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+PGcgaWQ9IkxheWVyXzQiPjxwYXRoIGQ9Ik0zOC42NDEsMTguNDg3bC0xLjAzMy02LjExM3YtMC4xNjVsLTAuMTE3LTAuNzY1bC0wLjIxNi0xLjEwNmgtNi42NjJ2Mi41NDFoNS4wNTZsMC4zOCwyLjI1NmgtMy45MDEgICBsLTguMDA4LDEwLjYwMWwtNS4yNTYtOC4wNjFoMi41MnYtMy4xOThoLTcuOTk0djMuMTk4aDIuNDAxbC0xLjIxMSwyLjIwOGMtMS40NTUtMC44ODYtMy4xNTgtMS40MDgtNC45ODctMS40MDggICBjLTUuMjk4LDAtOS41OTMsNC4yOTUtOS41OTMsOS41OTFjMCw1LjMwMSw0LjI5NSw5LjU5Niw5LjU5Myw5LjU5NmM1LjAyLDAsOS4xMzItMy44NTcsOS41NTEtOC43NzFIMjR2LTAuMDI1bDAuMDIxLTAuMDI1ICAgbDAuMDMzLDAuMDQ3bDAuMDE1LDAuMDJsOC40ODUtMTEuMjMxaDMuOTI2bDAuMTYsMC45NjZjLTQuNDU5LDAuODIzLTcuODQzLDQuNzI3LTcuODQzLDkuNDI1YzAsNS4zMDEsNC4yOTYsOS41OTYsOS41OTMsOS41OTYgICBjNS4yOTgsMCw5LjU5NC00LjI5NSw5LjU5NC05LjU5NkM0Ny45ODIsMjIuODU1LDQzLjgyMSwxOC42MjIsMzguNjQxLDE4LjQ4N3ogTTE1LjAyMSwyMy4zNzFjMC44NDIsMC45NzEsMS40MzQsMi4xNTMsMS42NiwzLjQ3MyAgIGgtMy41NjdMMTUuMDIxLDIzLjM3MXogTTkuNjExLDM1LjI2Yy0zLjk3NCwwLTcuMTk1LTMuMjE3LTcuMTk1LTcuMTkzYzAtMy45NzIsMy4yMjItNy4xOTMsNy4xOTUtNy4xOTMgICBjMS40MTEsMCwyLjcxNiwwLjQyMSwzLjgyNywxLjEyMmwtMi42NTksNC44NDloLTAuMDAybC0xLjEyNCwyLjA0N2wwLDBsLTAuMDA3LDAuMDE2bDIuMzQzLTAuMDEybDAuMDAxLTAuMDA0aDQuNzMxICAgQzE2LjMwOCwzMi40NzMsMTMuMzAyLDM1LjI2LDkuNjExLDM1LjI2eiBNMTkuMTE4LDI2Ljg0NGMtMC4yODUtMi4yMy0xLjMzMS00LjIxOC0yLjg3Ni01LjY5OGwxLjIyOS0yLjIzNmw1LjE3Myw3LjkzNUgxOS4xMTh6ICAgIE0zOC4zODksMzUuMjZjLTMuOTc0LDAtNy4xOTMtMy4yMTctNy4xOTMtNy4xOTNjMC0zLjUxLDIuNTItNi40MjQsNS44NDQtNy4wNTdsMS4zMzQsNy44ODFsMS45NjktMC4zM2wtMS4yODctNy42MjEgICBjMy42NTcsMC4zNDIsNi41MywzLjM4Myw2LjUzLDcuMTI3QzQ1LjU4NSwzMi4wNDMsNDIuMzYzLDM1LjI2LDM4LjM4OSwzNS4yNnoiIGZpbGw9IiMyNDFGMjAiLz48L2c+PC9zdmc+">
+                </p>
+                <p class="lead">Estudié en la Universidad de Chile, donde también cursé un magister en ciencias mención computación, realizando
+                    mi tesis al alero de
+                    <a href="http://www.niclabs.cl" target="_blank">NICLabs</a>.
+                </p>
+                <p class="lead">Actualmente me desempeño como ingeniero de software full stack en
+                    <a href="http://www.principal.cl" target="_blank">PFG</a>. Un relato más extenso sobre mi vida laboral está disponible en mi perfil de linkedin. </p>
                 <p class="lead">Si me quieres contactar, abajo algunas de mis redes.</p>
                 <br>
                 <div class="row text-center">
                     <div class="col">
                         <a target="_blank" href="https://www.linkedin.com/in/srblascov/">
-                            <img class="social_logo" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2IiB3aWR0aD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlLz48cGF0aCBkPSJNOSwxMlY5LjVhMC41LDAuNSwwLDAsMSwxLDBWMTJoMlY5YTIsMiwwLDAsMC0yLTJIN3Y1SDlaIiBmaWxsPSIjMjMxZjIwIi8+PGNpcmNsZSBjeD0iNSIgY3k9IjUiIGZpbGw9IiMyMzFmMjAiIHI9IjEiLz48cGF0aCBkPSJNMTQuNSwxSDEuNWEwLjUsMC41LDAsMCwwLS41LjV2MTNhMC41LDAuNSwwLDAsMCwuNS41aDEzYTAuNSwwLjUsMCwwLDAsLjUtMC41VjEuNUEwLjUsMC41LDAsMCwwLDE0LjUsMVpNMTMsMTJ2MUgzVjNIMTN2OVoiIGZpbGw9IiMyMzFmMjAiLz48cmVjdCBmaWxsPSIjMjMxZjIwIiBoZWlnaHQ9IjUiIHdpZHRoPSIyIiB4PSI0IiB5PSI3Ii8+PC9zdmc+">
+                            <img class="social_logo changeBlue" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2IiB3aWR0aD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlLz48cGF0aCBkPSJNOSwxMlY5LjVhMC41LDAuNSwwLDAsMSwxLDBWMTJoMlY5YTIsMiwwLDAsMC0yLTJIN3Y1SDlaIiBmaWxsPSIjMjMxZjIwIi8+PGNpcmNsZSBjeD0iNSIgY3k9IjUiIGZpbGw9IiMyMzFmMjAiIHI9IjEiLz48cGF0aCBkPSJNMTQuNSwxSDEuNWEwLjUsMC41LDAsMCwwLS41LjV2MTNhMC41LDAuNSwwLDAsMCwuNS41aDEzYTAuNSwwLjUsMCwwLDAsLjUtMC41VjEuNUEwLjUsMC41LDAsMCwwLDE0LjUsMVpNMTMsMTJ2MUgzVjNIMTN2OVoiIGZpbGw9IiMyMzFmMjAiLz48cmVjdCBmaWxsPSIjMjMxZjIwIiBoZWlnaHQ9IjUiIHdpZHRoPSIyIiB4PSI0IiB5PSI3Ii8+PC9zdmc+">
                         </a>
                     </div>
                     <div class="col">
@@ -58,25 +80,7 @@
                 <h1 class="display-5 float-right">Buen día!</h1>
             </div>
         </div>
-
-        <div class="row">
-            <div class="col">
-                <img src="https://scontent.fscl1-1.fna.fbcdn.net/v/t1.0-9/19599010_10211295681120480_6780945100850884653_n.jpg?oh=c8b94cead645423bedf103cf5b23879b&oe=5A1BBA28"
-                    class="rounded img-thumbnail">
-            </div>
-            <div class="col">
-                <img src="https://scontent.fscl1-1.fna.fbcdn.net/v/t1.0-9/18221730_10210776875670668_8491426820553682486_n.jpg?oh=1d728e1a15f22ae81f37609a6aa19b12&oe=5A2711D7"
-                    class="rounded img-thumbnail">
-            </div>
-            <div class="col">
-                <img src="https://scontent.fscl1-1.fna.fbcdn.net/v/t1.0-9/17757285_10210549847395103_7196492978259773007_n.jpg?oh=ddd8c15f747b7ddc2b01c4854737f1ce&oe=5A199B0E"
-                    class="rounded img-thumbnail">
-            </div>
-            <div class="col">
-                <img src="https://scontent.fscl1-1.fna.fbcdn.net/v/t1.0-9/16807782_10210125252620499_4172319535172793615_n.jpg?oh=25363f261142cceb221e69cc138a287b&oe=5A258021"
-                    class="rounded img-thumbnail">
-            </div>
-        </div>
+    </div>
 </body>
 
 </html>
