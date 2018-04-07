@@ -4,82 +4,70 @@
 <head>
     <meta charset="UTF-8">
     <title>Sebastián Blasco</title>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-        crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
-        crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1"
-        crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M"
-        crossorigin="anonymous">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1"
-        crossorigin="anonymous"></script>
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
 
     <style>
         img.social_logo {
             height: 40px;
-            fill: red;
         }
-
-        changeBlue:hover {
-            fill: blue;
+        img.social_logo:hover {
+            transition: all 0.1s;
         }
     </style>
 </head>
 
-<body>
-    <br>
-    <div class="container">
-        <div class="jumbotron">
-            <div class="col">
-                <div class="row">
-                    <div class="col-md-9 col-12">
-                        <h1 class="display-3">S.R. Blasco V.</h1>
-                        <p class="lead">
-                            Sebastián Ramón Blasco Valencia.
-                        </p>
-                    </div>
-                    <div class="col-md-2 col-12 text-center">
-                        <img src="img/me.jpg" class="rounded img-thumbnail profile">
-                    </div>
+<body class="text-center">
 
-                </div>
-
-                <hr class="my-4">
-                <p class="lead">Hola!</p>
-                <p class="lead">Soy ingeniero civil en computación, actividad a la que me
-                    <abbr title="Felizmente :)">dedico a diario</abbr>. Me muevo en
-                    <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjwhRE9DVFlQRSBzdmcgIFBVQkxJQyAnLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4nICAnaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkJz48c3ZnIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDQ4IDQ4IiBoZWlnaHQ9IjQ4cHgiIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDQ4IDQ4IiB3aWR0aD0iNDhweCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+PGcgaWQ9IkxheWVyXzQiPjxwYXRoIGQ9Ik0zOC42NDEsMTguNDg3bC0xLjAzMy02LjExM3YtMC4xNjVsLTAuMTE3LTAuNzY1bC0wLjIxNi0xLjEwNmgtNi42NjJ2Mi41NDFoNS4wNTZsMC4zOCwyLjI1NmgtMy45MDEgICBsLTguMDA4LDEwLjYwMWwtNS4yNTYtOC4wNjFoMi41MnYtMy4xOThoLTcuOTk0djMuMTk4aDIuNDAxbC0xLjIxMSwyLjIwOGMtMS40NTUtMC44ODYtMy4xNTgtMS40MDgtNC45ODctMS40MDggICBjLTUuMjk4LDAtOS41OTMsNC4yOTUtOS41OTMsOS41OTFjMCw1LjMwMSw0LjI5NSw5LjU5Niw5LjU5Myw5LjU5NmM1LjAyLDAsOS4xMzItMy44NTcsOS41NTEtOC43NzFIMjR2LTAuMDI1bDAuMDIxLTAuMDI1ICAgbDAuMDMzLDAuMDQ3bDAuMDE1LDAuMDJsOC40ODUtMTEuMjMxaDMuOTI2bDAuMTYsMC45NjZjLTQuNDU5LDAuODIzLTcuODQzLDQuNzI3LTcuODQzLDkuNDI1YzAsNS4zMDEsNC4yOTYsOS41OTYsOS41OTMsOS41OTYgICBjNS4yOTgsMCw5LjU5NC00LjI5NSw5LjU5NC05LjU5NkM0Ny45ODIsMjIuODU1LDQzLjgyMSwxOC42MjIsMzguNjQxLDE4LjQ4N3ogTTE1LjAyMSwyMy4zNzFjMC44NDIsMC45NzEsMS40MzQsMi4xNTMsMS42NiwzLjQ3MyAgIGgtMy41NjdMMTUuMDIxLDIzLjM3MXogTTkuNjExLDM1LjI2Yy0zLjk3NCwwLTcuMTk1LTMuMjE3LTcuMTk1LTcuMTkzYzAtMy45NzIsMy4yMjItNy4xOTMsNy4xOTUtNy4xOTMgICBjMS40MTEsMCwyLjcxNiwwLjQyMSwzLjgyNywxLjEyMmwtMi42NTksNC44NDloLTAuMDAybC0xLjEyNCwyLjA0N2wwLDBsLTAuMDA3LDAuMDE2bDIuMzQzLTAuMDEybDAuMDAxLTAuMDA0aDQuNzMxICAgQzE2LjMwOCwzMi40NzMsMTMuMzAyLDM1LjI2LDkuNjExLDM1LjI2eiBNMTkuMTE4LDI2Ljg0NGMtMC4yODUtMi4yMy0xLjMzMS00LjIxOC0yLjg3Ni01LjY5OGwxLjIyOS0yLjIzNmw1LjE3Myw3LjkzNUgxOS4xMTh6ICAgIE0zOC4zODksMzUuMjZjLTMuOTc0LDAtNy4xOTMtMy4yMTctNy4xOTMtNy4xOTNjMC0zLjUxLDIuNTItNi40MjQsNS44NDQtNy4wNTdsMS4zMzQsNy44ODFsMS45NjktMC4zM2wtMS4yODctNy42MjEgICBjMy42NTcsMC4zNDIsNi41MywzLjM4Myw2LjUzLDcuMTI3QzQ1LjU4NSwzMi4wNDMsNDIuMzYzLDM1LjI2LDM4LjM4OSwzNS4yNnoiIGZpbGw9IiMyNDFGMjAiLz48L2c+PC9zdmc+">
-                </p>
-                <p class="lead">Estudié en la Universidad de Chile, donde también cursé un magister en ciencias mención computación, realizando
-                    mi tesis al alero de
-                    <a href="http://www.niclabs.cl" target="_blank">NICLabs</a>.
-                </p>
-                <p class="lead">Actualmente me desempeño como ingeniero de software full stack en
-                    <a href="http://www.principal.cl" target="_blank">PFG</a>. Un relato más extenso sobre mi vida laboral está disponible en mi perfil de linkedin. </p>
-                <p class="lead">Si me quieres contactar, abajo algunas de mis redes.</p>
-                <br>
-                <div class="row text-center">
-                    <div class="col">
-                        <a target="_blank" href="https://www.linkedin.com/in/srblascov/">
-                            <img class="social_logo changeBlue" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2IiB3aWR0aD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlLz48cGF0aCBkPSJNOSwxMlY5LjVhMC41LDAuNSwwLDAsMSwxLDBWMTJoMlY5YTIsMiwwLDAsMC0yLTJIN3Y1SDlaIiBmaWxsPSIjMjMxZjIwIi8+PGNpcmNsZSBjeD0iNSIgY3k9IjUiIGZpbGw9IiMyMzFmMjAiIHI9IjEiLz48cGF0aCBkPSJNMTQuNSwxSDEuNWEwLjUsMC41LDAsMCwwLS41LjV2MTNhMC41LDAuNSwwLDAsMCwuNS41aDEzYTAuNSwwLjUsMCwwLDAsLjUtMC41VjEuNUEwLjUsMC41LDAsMCwwLDE0LjUsMVpNMTMsMTJ2MUgzVjNIMTN2OVoiIGZpbGw9IiMyMzFmMjAiLz48cmVjdCBmaWxsPSIjMjMxZjIwIiBoZWlnaHQ9IjUiIHdpZHRoPSIyIiB4PSI0IiB5PSI3Ii8+PC9zdmc+">
-                        </a>
-                    </div>
-                    <div class="col">
-                        <a target="_blank" href="https://twitter.com/sebablasko">
-                            <img class="social_logo" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2IiB3aWR0aD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlLz48cGF0aCBkPSJNMTQsMi40OTk3NmEwLjUsMC41LDAsMCwwLS42MDc0OC0wLjQ4ODI4TDEyLjIzMzk1LDIuNzA5QTMuOTk4LDMuOTk4LDAsMCwwLDYuMDI0NDEsNS41ODM1LDM2Ljc0MDQyLDM2Ljc0MDQyLDAsMCwxLDIuMDc5MSwzLjI5NzI0YTAuNDk3MTksMC40OTcxOSwwLDAsMC0uNzUxODkuMzExODNMMC45OTkzOSw1LjAzMTI1Yy0wLjUzNTE2LDIuNDM0NTcuNDE0MTgsNC4yNTE0NiwyLjE0OSw1LjkyMDQxLTAuMTYwNTguMDc2NzgtLjkxOTE5LDAuMzk4MDctMS40OTcwNywwLjY0MTQyYTAuNDk4ODgsMC40OTg4OCwwLDAsMC0uMTU3NTMuODEzNmwwLjM0Mzc1LDAuMzQzNjNhNy40MDIsNy40MDIsMCwwLDAsNC41MTQ2NSwyLjIyMDU4LDcuMDA3NzIsNy4wMDc3MiwwLDAsMCw1LjYyNjI4LTIuMDMyNDEsNi43MTUxOSw2LjcxNTE5LDAsMCwwLDEuOTkzNjUtNC4xOTQ4MkwxNCw2LjAyNTM5YzAtLjAxMDE5LTAuMDAyOTMtMC4wMTk2NS0wLjAwMy0wLjAyOTg1TDE0LDZWMi40OTk3NlpNOCw2LjAyNTMzYTIsMiwwLDAsMSw0LC4wMDAwNlY3LjI2NDY1bC0wLjAwNzMyLjc3MmE0LjY4NDE2LDQuNjg0MTYsMCwwLDEtMS40MjgyMiwzLjQ4Nzc5LDUuMDQ1MTUsNS4wNDUxNSwwLDAsMS01Ljg5NjQ4LjkwMjM0cTAuNDEwODktLjIxNTMzLjgzMDU3LTAuNDU4NWwxLjQ4Nzc5LS44NjI3OS0xLjQ4NTg0LS44NjYyMWE1LjA0OTM2LDUuMDQ5MzYsMCwwLDEtMi4zOTQtMy45NjcyQTI2LjU3NywyNi41NzcsMCwwLDAsOCw4LjY4NzVWNi4wMjUzM1oiIGZpbGw9IiMyMzFmMjAiLz48Y2lyY2xlIGN4PSIxMCIgY3k9IjYiIGZpbGw9IiMyMzFmMjAiIHI9IjEiLz48L3N2Zz4=">
-                        </a>
-                    </div>
-                    <div class="col">
-                        <a target="_blank" href="https://github.com/sebablasko">
-                            <img class="social_logo" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2IiB3aWR0aD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlLz48ZWxsaXBzZSBjeD0iNSIgY3k9IjEwLjUiIGZpbGw9IiMyMzFmMjAiIHJ4PSIxIiByeT0iMS41Ii8+PGVsbGlwc2UgY3g9IjExIiBjeT0iMTAuNSIgZmlsbD0iIzIzMWYyMCIgcng9IjEiIHJ5PSIxLjUiLz48cGF0aCBkPSJNMTQuNSw0SDE0TDEyLjQxMzk0LDEuNjIwOTFhMC40OTc0NywwLjQ5NzQ3LDAsMCwwLS44Mjc4OCwwTDEwLDRINkw0LjQxMzk0LDEuNjIwOTFhMC40OTc0NywwLjQ5NzQ3LDAsMCwwLS44Mjc4OCwwTDIsNEgxLjVhMC41LDAuNSwwLDAsMC0uNS41djEwYTAuNSwwLjUsMCwwLDAsLjUuNWgxM2EwLjUsMC41LDAsMCwwLC41LTAuNVY0LjVBMC41LDAuNSwwLDAsMCwxNC41LDRaTTEzLDEzSDNWOEgxM3Y1WiIgZmlsbD0iIzIzMWYyMCIvPjwvc3ZnPg==">
-                        </a>
-                    </div>
-                </div>
-                <br>
-                <h1 class="display-5 float-right">Buen día!</h1>
+    <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+        <header class="masthead mb-auto">
+            <div class="inner">
+                <h3 class="masthead-brand">SBlasco</h3>
+                <nav class="nav nav-masthead justify-content-center">
+                    <a class="nav-link active" href="#">Portada</a>
+                    <a class="nav-link" href="http://blog.blasco.cl">Blog</a>
+                </nav>
             </div>
-        </div>
+        </header>
+
+        <main role="main" class="inner cover">
+            <h1 class="cover-heading">Sebastián R. Blasco V.</h1>
+            <p class="lead">
+                Soy ingeniero civil en computación, actividad a la que me
+                <abbr title="Felizmente :)">dedico a diario</abbr>. Estudié en la
+                <a href="http://www.uchile.cl" target="_blank">la Chile</a>, donde también cursé un magister en ciencias mención computación, realizando mi tesis al alero
+                de
+                <a href="http://www.niclabs.cl" target="_blank">NIC Labs</a>. Actualmente me desempeño como ingeniero de software full stack en
+                <a href="http://www.principal.cl"
+                    target="_blank">PFG</a>
+            </p>
+            <div class="row text-center">
+                <div class="col">
+                    <a target="_blank" href="https://www.linkedin.com/in/srblascov/">
+                        <img class="social_logo" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2IiB3aWR0aD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlLz48cGF0aCBkPSJNOSwxMlY5LjVhMC41LDAuNSwwLDAsMSwxLDBWMTJoMlY5YTIsMiwwLDAsMC0yLTJIN3Y1SDlaIiBmaWxsPSIjMjMxZjIwIi8+PGNpcmNsZSBjeD0iNSIgY3k9IjUiIGZpbGw9IiMyMzFmMjAiIHI9IjEiLz48cGF0aCBkPSJNMTQuNSwxSDEuNWEwLjUsMC41LDAsMCwwLS41LjV2MTNhMC41LDAuNSwwLDAsMCwuNS41aDEzYTAuNSwwLjUsMCwwLDAsLjUtMC41VjEuNUEwLjUsMC41LDAsMCwwLDE0LjUsMVpNMTMsMTJ2MUgzVjNIMTN2OVoiIGZpbGw9IiMyMzFmMjAiLz48cmVjdCBmaWxsPSIjMjMxZjIwIiBoZWlnaHQ9IjUiIHdpZHRoPSIyIiB4PSI0IiB5PSI3Ii8+PC9zdmc+">
+                    </a>
+                </div>
+                <div class="col">
+                    <a target="_blank" href="https://twitter.com/sebablasko">
+                        <img class="social_logo" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2IiB3aWR0aD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlLz48cGF0aCBkPSJNMTQsMi40OTk3NmEwLjUsMC41LDAsMCwwLS42MDc0OC0wLjQ4ODI4TDEyLjIzMzk1LDIuNzA5QTMuOTk4LDMuOTk4LDAsMCwwLDYuMDI0NDEsNS41ODM1LDM2Ljc0MDQyLDM2Ljc0MDQyLDAsMCwxLDIuMDc5MSwzLjI5NzI0YTAuNDk3MTksMC40OTcxOSwwLDAsMC0uNzUxODkuMzExODNMMC45OTkzOSw1LjAzMTI1Yy0wLjUzNTE2LDIuNDM0NTcuNDE0MTgsNC4yNTE0NiwyLjE0OSw1LjkyMDQxLTAuMTYwNTguMDc2NzgtLjkxOTE5LDAuMzk4MDctMS40OTcwNywwLjY0MTQyYTAuNDk4ODgsMC40OTg4OCwwLDAsMC0uMTU3NTMuODEzNmwwLjM0Mzc1LDAuMzQzNjNhNy40MDIsNy40MDIsMCwwLDAsNC41MTQ2NSwyLjIyMDU4LDcuMDA3NzIsNy4wMDc3MiwwLDAsMCw1LjYyNjI4LTIuMDMyNDEsNi43MTUxOSw2LjcxNTE5LDAsMCwwLDEuOTkzNjUtNC4xOTQ4MkwxNCw2LjAyNTM5YzAtLjAxMDE5LTAuMDAyOTMtMC4wMTk2NS0wLjAwMy0wLjAyOTg1TDE0LDZWMi40OTk3NlpNOCw2LjAyNTMzYTIsMiwwLDAsMSw0LC4wMDAwNlY3LjI2NDY1bC0wLjAwNzMyLjc3MmE0LjY4NDE2LDQuNjg0MTYsMCwwLDEtMS40MjgyMiwzLjQ4Nzc5LDUuMDQ1MTUsNS4wNDUxNSwwLDAsMS01Ljg5NjQ4LjkwMjM0cTAuNDEwODktLjIxNTMzLjgzMDU3LTAuNDU4NWwxLjQ4Nzc5LS44NjI3OS0xLjQ4NTg0LS44NjYyMWE1LjA0OTM2LDUuMDQ5MzYsMCwwLDEtMi4zOTQtMy45NjcyQTI2LjU3NywyNi41NzcsMCwwLDAsOCw4LjY4NzVWNi4wMjUzM1oiIGZpbGw9IiMyMzFmMjAiLz48Y2lyY2xlIGN4PSIxMCIgY3k9IjYiIGZpbGw9IiMyMzFmMjAiIHI9IjEiLz48L3N2Zz4=">
+                    </a>
+                </div>
+                <div class="col">
+                    <a target="_blank" href="https://github.com/sebablasko">
+                        <img class="social_logo" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2IiB3aWR0aD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlLz48ZWxsaXBzZSBjeD0iNSIgY3k9IjEwLjUiIGZpbGw9IiMyMzFmMjAiIHJ4PSIxIiByeT0iMS41Ii8+PGVsbGlwc2UgY3g9IjExIiBjeT0iMTAuNSIgZmlsbD0iIzIzMWYyMCIgcng9IjEiIHJ5PSIxLjUiLz48cGF0aCBkPSJNMTQuNSw0SDE0TDEyLjQxMzk0LDEuNjIwOTFhMC40OTc0NywwLjQ5NzQ3LDAsMCwwLS44Mjc4OCwwTDEwLDRINkw0LjQxMzk0LDEuNjIwOTFhMC40OTc0NywwLjQ5NzQ3LDAsMCwwLS44Mjc4OCwwTDIsNEgxLjVhMC41LDAuNSwwLDAsMC0uNS41djEwYTAuNSwwLjUsMCwwLDAsLjUuNWgxM2EwLjUsMC41LDAsMCwwLC41LTAuNVY0LjVBMC41LDAuNSwwLDAsMCwxNC41LDRaTTEzLDEzSDNWOEgxM3Y1WiIgZmlsbD0iIzIzMWYyMCIvPjwvc3ZnPg==">
+                    </a>
+                </div>
+            </div>
+            <!-- <p class="lead">
+                <a href="#" class="btn btn-lg btn-secondary">Learn more</a>
+            </p> -->
+        </main>
+
+        <footer class="mastfoot mt-auto">
+            <div class="inner">
+                <p>Basado en <a href="https://getbootstrap.com/">Bootstrap</a> personalizado por mi :-)</p>
+            </div>
+        </footer>
     </div>
 </body>
 
