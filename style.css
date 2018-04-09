@@ -3,8 +3,22 @@
  */
 
 /* IMG */
-img.social_logo {
-  height: 40px; 
+a svg { 
+  height: 40px;
+  fill: rgba(255, 255, 255, .9);
+}
+a svg:hover .twitter,
+a svg:hover .linkedin,
+a svg:hover .github{ 
+  fill: #f4ca16;
+}
+a svg .twitter,
+a svg .linkedin,
+a svg .github{ 
+  transition: 200ms;
+  transition-timing-function: ease-in-out;
+  -webkit-transition: 200ms;
+  -webkit-transition-timing-function: ease-in-out;
 }
 
 /* Links */
@@ -12,6 +26,7 @@ a,
 a:focus,
 a:hover {
   color: #fff;
+  text-decoration: underline dotted;
 }
 
 /* Custom default button */
