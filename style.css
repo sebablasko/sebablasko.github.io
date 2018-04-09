@@ -35,8 +35,14 @@ body {
   background-color: #006bb2;
 }
 
+.overlay {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  box-shadow: inset 0 0 5rem rgba(0, 0, 0, .5);
+}
+
 body {
-  min-height: 620px;
   display: -ms-flexbox;
   display: -webkit-box;
   display: flex;
@@ -45,7 +51,6 @@ body {
   justify-content: center;
   color: #fff;
   text-shadow: 0 .05rem .1rem rgba(0, 0, 0, .5);
-  box-shadow: inset 0 0 5rem rgba(0, 0, 0, .5);
 }
 
 .cover-container {
