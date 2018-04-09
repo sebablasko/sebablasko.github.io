@@ -2,6 +2,11 @@
  * Globals
  */
 
+/* IMG */
+img.social_logo {
+  height: 40px; 
+}
+
 /* Links */
 a,
 a:focus,
