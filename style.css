@@ -36,6 +36,7 @@ body {
 }
 
 body {
+  min-height: 620px;
   display: -ms-flexbox;
   display: -webkit-box;
   display: flex;
