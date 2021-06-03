@@ -1,15 +1,15 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "9edfeacd0b32f0b9056d",
+    "revision": "49d4b1099e516774e23e",
     "url": "/wallet/css/app.1b71c7e4.css"
   },
   {
-    "revision": "70ad001b7428f657e92cdeb9877e82a9",
+    "revision": "1a40ec9abe1a3bd9d97271abf17520f5",
     "url": "/wallet/index.html"
   },
   {
-    "revision": "9edfeacd0b32f0b9056d",
-    "url": "/wallet/js/app.0c189e21.js"
+    "revision": "49d4b1099e516774e23e",
+    "url": "/wallet/js/app.5cd5a5bc.js"
   },
   {
     "revision": "80dfc686b5ec57e98969",
