@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/wallet/css/chunk-vendors.70881b4d.css"
   },
   {
-    "revision": "68a2f9695b0f5076d9afa8b353a95e44",
+    "revision": "5ff68b7e32d10db79c7417b0430f6b0e",
     "url": "/wallet/index.html"
   },
   {
@@ -20,7 +20,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/wallet/js/chunk-vendors.44fa677d.js"
   },
   {
-    "revision": "87caf51c64178e1840b64b57110189f8",
+    "revision": "e2d6be464e35223f2e706e32b380e0f9",
     "url": "/wallet/manifest.json"
   }
 ]);
