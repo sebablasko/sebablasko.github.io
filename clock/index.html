@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>My dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14"></script>
+  <script src="https://momentjs.com/downloads/moment-with-locales.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.2.3/axios.min.js" integrity="sha512-L4lHq2JI/GoKsERT8KYa72iCwfSrKYWEyaBxzJeeITM9Lub5vlTj8tufqYk056exhjo2QDEipJrg6zen/DDtoQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Encode+Sans&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      color: white;
+      background: black;
+    }
+    #app {
+      display: flex;
+      flex-direction: column;
+      font-family: 'Encode Sans', sans-serif;
+      justify-content: center;
+      align-items: center;
+      margin: auto;
+      width: 900px;
+    }
+    .title {
+      color: white;
+      font-weight: bold;
+      font-size: 120px;
+      margin: 20px auto 5px;
+      transition: all 5s ease-out;
+      text-shadow: 1px 1px silver;
+    }
+    .subtitle {
+      color: white;
+      font-weight: light;
+      margin: 5px auto 20px;
+      font-size: 36px;
+      text-shadow: 1px 1px silver;
+    }
+    .busses {
+      display: flex;
+      flex-direction: column;
+      padding: 5px 10px;
+      width: 100%;
+      box-shadow: 0 2px 1px silver;
+      border-radius: 2px;
+    }
+    .busStopServicios {
+      display: flex;
+      flex-direction: row;
+      flex: 1;
+    }
+    .busStopTitle {
+      font-weight: bold;
+    }
+    .busStopInformation {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      padding: 8px;
+    }
+    .busStopDestino {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+    .busStopBusNumber {
+      font-weight: bold;
+      width: 35px;
+      margin-right: 7px;
+      text-align: center;
+      text-shadow: 1px 1px black;
+    }
+    .busStopBusDestino {
+      font-style: italic;
+      font-size: 12px;
+    }
+    .busStopNextBusses {
+      display: flex;
+      flex-direction: column;
+    }
+    .busStopNextBus {
+      display: flex;
+      flex-direction: row;
+      font-size: 11px;
+      margin-left: 12px;
+    }
+    .busStopNextNextBus {
+      display: flex;
+      flex-direction: row;
+      font-size: 9px;
+      margin-left: 12px;
+    }
+    .circle {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background-color: gray;
+    }
+    .innerCircle {
+      position: absolute;
+      border-radius: 50%;
+      background-color: black;
+      transition: all 5s ease-out;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="title"> {{ time }} </div>
+    <div class="subtitle"> {{ date }} </div>
+    <div class="busses">
+      <div class="busStopTitle">{{ red1.paradero }}</div>
+      <div class="busStopServicios">
+        <div class="busStopInformation" v-for="(item, index) in red1.servicios.item" :key="index">
+          <div class="busStopDestino">
+            <div class="busStopBusNumber" :style="{ background: item.color }">{{ item.servicio }}</div>
+            <div class="busStopBusDestino">a {{ item.destino }}</div>
+          </div>
+          <div class="busStopNextBusses">
+            <div class="busStopNextBus">{{ formatBusStopNextBus(item, 1 )}} </div>
+            <div class="busStopNextNextBus">{{ formatBusStopNextBus(item, 2 )}} </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="busses">
+      <div class="busStopTitle">{{ red2.paradero }}</div>
+      <div class="busStopServicios">
+        <div class="busStopInformation" v-for="(item, index) in red2.servicios.item" :key="index">
+          <div class="busStopDestino">
+            <div class="busStopBusNumber" :style="{ background: item.color }">{{ item.servicio }}</div>
+            <div class="busStopBusDestino">a {{ item.destino }}</div>
+          </div>
+          <div class="busStopNextBusses">
+            <div class="busStopNextBus">{{ formatBusStopNextBus(item, 1 )}} </div>
+            <div class="busStopNextNextBus">{{ formatBusStopNextBus(item, 2 )}} </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="circle"><div ref="circle" class="innerCircle"></div></div>
+    <!-- <button @click="refreshBusstop">refresh</button> -->
+  </div>
+</div>
+
+  <script>
+    var app = new Vue({
+      el: '#app',
+      data: {
+        red1: {
+          fechaprediccion: undefined,
+          horaprediccion: undefined,
+          servicios: { item: [] },
+        },
+        red2: {
+          fechaprediccion: undefined,
+          horaprediccion: undefined,
+          servicios: { item: [] },
+        },
+        currentTime: moment(),
+      },
+      methods: {
+        async retrieveBusStop(codsimt) {
+          const jwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NzM0NzM1MTY5MzJ9.LphGjvJ9DdgZnhM4oQHdP4FpNd_QX5rJRhOLiGQBuiA';
+          const redUrl = `https://www.red.cl/predictor/prediccion?t=${jwt}&codsimt=${codsimt}&codser=`;
+          const { data } = await axios.get(redUrl);
+          this.$refs.circle.style.width = `${100}px`;
+          this.$refs.circle.style.height = `${100}px`;
+          return data;
+        },
+        async refreshBusstop() {
+          this.red1 = await this.retrieveBusStop('PD53');
+          this.red2 = await this.retrieveBusStop('PD106');
+        },
+        formatBusStopNextBus(bus, index) {
+          const key1 = `horaprediccionbus${index}`;
+          const key2 = `distanciabus${index}`;
+          if (bus[key1] === null || bus[key2] === null) {
+            return 'No hay buses';
+          }
+          return `${bus[key1]} (${bus[key2]} mts.)`
+        },
+      },
+      computed: {
+        time() {
+          return this.currentTime.format('HH:mm:ss');
+        },
+        date() {
+          return `${this.currentTime.locale('es').format('dddd DD')} de ${this.currentTime.locale('es').format('MMMM YYYY')}`;
+        },
+      },
+      async mounted() {
+        var busTimer = 30000;
+        // Clock
+        this.currentTime = moment();
+        setInterval(() => {this.currentTime = moment()}, 1000);
+        // First busstop
+        this.red1 = await this.retrieveBusStop('PD53');
+        setInterval(async () => {this.red1 = await this.retrieveBusStop('PD53')}, busTimer);
+        // Second busstop
+        this.red2 = await this.retrieveBusStop('PD106');
+        setInterval(async () => {this.red2 = await this.retrieveBusStop('PD106')}, busTimer);
+        // Circle
+        //setInterval(async () => {
+        //  const current = parseInt(this.$refs.circle.style.width, 10) || 10;
+        //  const newVal = (current + 1) % 121;
+        //  this.$refs.circle.style.width = `${newVal}px`;
+        //  this.$refs.circle.style.height = `${newVal}px`;
+        //}, 100);
+      }
+    })
+  </script>
+</body>
+
+</html>

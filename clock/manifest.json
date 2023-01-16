@@ -1,0 +1,9 @@
+{
+    "name": "My Dashboard",
+    "short_name": "MyDashboard",
+    "start_url": "index.html",
+    "display": "fullscreen",
+    "background_color": "#fdfdfd",
+    "theme_color": "#000000",
+    "orientation": "landscape"
+  }
