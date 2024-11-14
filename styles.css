@@ -5,7 +5,6 @@ html {
 
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #f8f9fa;
 }
 
 .navbar-brand {
@@ -17,7 +16,7 @@ header {
 }
 
 header.jumbotron {
-    background-image: radial-gradient( circle farthest-corner at 22.4% 21.7%, rgba(4,189,228,1) 0%, rgba(2,83,185,1) 100.2% );
+    background-image: radial-gradient(circle farthest-corner at 22.4% 21.7%, rgba(40, 44, 92, 0.8) 0%, rgba(23, 27, 33, 0.8) 100%);
     background-size: cover;
 }
 
