@@ -1,0 +1,75 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  overflow: hidden;
+}
+
+.container {
+  text-align: center;
+}
+
+#clock {
+  font-family: "Roboto Mono", monospace;
+  font-size: 9rem;
+  letter-spacing: 0.05rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#date {
+  font-size: 1.9rem;
+  color: #f0f0f0;
+  background-color: #333;
+  padding: 10px;
+  border-radius: 10px;
+  display: inline-block;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+}
+
+.fullscreen-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.loading {
+  margin-right: 10px;
+  animation: clockSpin 20s infinite;
+}
+
+@keyframes clockSpin {
+  0% {
+    transform: rotate(0deg);
+    transform-origin: 50% 50%;
+  }
+  100% {
+    transform: rotate(360deg);
+    transform-origin: 50% 50%;
+  }
+}
+
+.animate {
+  animation: zoom 1s forwards;
+}
+
+@keyframes zoom {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

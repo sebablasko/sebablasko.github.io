@@ -1,9 +1,9 @@
 {
-    "name": "My Dashboard",
-    "short_name": "MyDashboard",
+    "name": "Reloj",
+    "short_name": "Reloj",
     "start_url": "index.html",
     "display": "fullscreen",
-    "background_color": "#fdfdfd",
-    "theme_color": "#000000",
+    "background_color": "#212529",
+    "theme_color": "#212529",
     "orientation": "landscape"
   }
