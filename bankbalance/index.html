@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scotia Tracker — Acceso Seguro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <!-- Chart.js para el gráfico de variación de gastos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 antialiased sm:py-8">
+
+  <div id="app" class="max-w-md mx-auto min-h-screen sm:min-h-[844px] bg-slate-950 sm:rounded-3xl shadow-2xl flex flex-col border border-slate-800 overflow-hidden relative">
+
+    <!-- PANTALLA DE LOGIN -->
+    <div v-if="!authenticated" class="flex-1 flex flex-col justify-center items-center p-6 text-center">
+      <div class="w-16 h-16 bg-slate-900 rounded-2xl border border-slate-800 flex items-center justify-center text-2xl mb-4 shadow-lg">
+        🔒
+      </div>
+      <h1 class="text-xl font-bold text-white mb-1">Scotia Tracker</h1>
+      <p class="text-xs text-slate-400 mb-6">Enter your PIN code to access information</p>
+
+      <form @submit.prevent="login" class="w-full max-w-xs space-y-4">
+        <div>
+          <input 
+            v-model="pinInput" 
+            type="password" 
+            inputmode="numeric" 
+            pattern="[0-9]*"
+            maxlength="8" 
+            placeholder="PIN" 
+            autofocus
+            autocomplete="one-time-code"
+            class="w-full bg-slate-900 border border-slate-800 text-center text-2xl tracking-widest text-white rounded-xl py-3 focus:outline-none focus:border-emerald-500 transition">
+        </div>
+
+        <p v-if="errorMessage" class="text-xs text-red-400 font-medium">{{ errorMessage }}</p>
+
+        <button type="submit" :disabled="loading"
+                class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-900/30 disabled:opacity-50">
+          {{ loading ? 'Verifying...' : 'Unlock' }}
+        </button>
+      </form>
+    </div>
+
+    <!-- APLICACIÓN PRINCIPAL -->
+    <template v-else>
+      <!-- HEADER -->
+      <header class="bg-slate-900/90 backdrop-blur-md sticky top-0 z-20 px-5 pt-4 pb-3 border-b border-slate-800/80">
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+            <span class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Scotia Consolidator</span>
+          </div>
+          <button @click="logout" class="text-[10px] text-slate-400 hover:text-red-400 bg-slate-800 px-2 py-1 rounded-md font-mono transition">
+            🔒 Salir
+          </button>
+        </div>
+
+        <!-- RESUMEN DE CUPO -->
+        <div class="bg-gradient-to-br from-slate-900 to-slate-800 p-4 rounded-2xl border border-slate-700/60 shadow-lg">
+          <div class="flex justify-between items-baseline mb-1">
+            <span class="text-xs font-medium text-slate-400">Cupo Utilizado ({{ data.balances?.porcentaje_uso || 0 }}%)</span>
+            <span class="text-lg font-bold text-red-400">{{ formatCLP(data.balances?.cupo_utilizado) }}</span>
+          </div>
+
+          <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden mb-3 border border-slate-800">
+            <div class="bg-gradient-to-r from-red-500 to-rose-400 h-full rounded-full transition-all duration-500" 
+                 :style="{ width: (data.balances?.porcentaje_uso || 0) + '%' }"></div>
+          </div>
+
+          <div class="flex justify-between text-xs text-slate-400 pt-2 border-t border-slate-800">
+            <div>
+              <span class="text-[10px] block text-slate-500">DISPONIBLE</span>
+              <span class="font-bold text-emerald-400">{{ formatCLP(data.balances?.cupo_disponible) }}</span>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] block text-slate-500">PUNTOS SCOTIA</span>
+              <span class="font-bold text-amber-400">★ {{ formatNumber(data.loyalty?.total) }}</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENIDO PRINCIPAL -->
+      <main class="p-4 flex-1 space-y-4 overflow-y-auto no-scrollbar pb-12">
+        
+        <!-- SECCIÓN DE GRÁFICO DE VARIACIÓN DE GASTOS -->
+        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80 shadow-sm space-y-3">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Variación de Gastos</h3>
+              <p class="text-[10px] text-slate-500">Últimos 6 {{ modoGrafico === 'dia' ? 'días' : 'meses' }} acumulados</p>
+            </div>
+            <!-- Toggle Día / Mes -->
+            <div class="flex bg-slate-950 p-0.5 rounded-xl border border-slate-800 text-[10px] font-medium">
+              <button 
+                @click="modoGrafico = 'dia'" 
+                :class="modoGrafico === 'dia' ? 'bg-emerald-600 text-white font-bold shadow' : 'text-slate-400'" 
+                class="px-2.5 py-1 rounded-lg transition">
+                Día
+              </button>
+              <button 
+                @click="modoGrafico = 'mes'" 
+                :class="modoGrafico === 'mes' ? 'bg-emerald-600 text-white font-bold shadow' : 'text-slate-400'" 
+                class="px-2.5 py-1 rounded-lg transition">
+                Mes
+              </button>
+            </div>
+          </div>
+
+          <!-- Canvas para Chart.js -->
+          <div class="h-36 w-full relative">
+            <canvas id="chartVariacion"></canvas>
+          </div>
+        </div>
+
+        <!-- CONTROL DE FECHA DE REFERENCIA -->
+        <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <span class="text-base">📅</span>
+            <div>
+              <span class="text-[10px] font-semibold text-slate-400 block leading-tight">FECHA CONSULTADA</span>
+              <span class="text-xs font-mono text-emerald-400">{{ fechaFiltro }}</span>
+            </div>
+          </div>
+          <input 
+            type="date" 
+            v-model="fechaFiltro"
+            class="bg-slate-950 text-slate-200 border border-slate-800 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 font-mono transition">
+        </div>
+
+        <!-- TARJETAS DE GASTOS -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 shadow-sm">
+            <span class="text-[11px] font-medium text-slate-400 block mb-1">Gastado en la Fecha</span>
+            <p class="text-lg font-bold text-white tracking-tight">{{ formatCLP(gastosDiaSeleccionado) }}</p>
+            <span class="text-[10px] text-slate-500 font-mono mt-0.5 block">{{ fechaFiltro }}</span>
+          </div>
+
+          <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 shadow-sm">
+            <span class="text-[11px] font-medium text-slate-400 block mb-1">Gastos del Mes</span>
+            <p class="text-lg font-bold text-white tracking-tight">{{ formatCLP(gastosMesSeleccionado) }}</p>
+            <span class="text-[10px] text-slate-500 block mt-0.5">{{ totalTransaccionesMes }} movs. en {{ mesAnioTexto }}</span>
+          </div>
+        </div>
+
+        <!-- BUSCADOR Y FILTROS -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Movimientos</h2>
+            <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-[11px] font-medium">
+              <button @click="filtroFecha = 'dia'" :class="filtroFecha === 'dia' ? 'bg-slate-800 text-white shadow' : 'text-slate-400'" class="px-2.5 py-1 rounded-lg transition">Día</button>
+              <button @click="filtroFecha = 'mes'" :class="filtroFecha === 'mes' ? 'bg-slate-800 text-white shadow' : 'text-slate-400'" class="px-2.5 py-1 rounded-lg transition">Mes</button>
+              <button @click="filtroFecha = 'todos'" :class="filtroFecha === 'todos' ? 'bg-slate-800 text-white shadow' : 'text-slate-400'" class="px-2.5 py-1 rounded-lg transition">Todos</button>
+            </div>
+          </div>
+          <input v-model="busqueda" type="text" placeholder="Buscar por comercio o ciudad..." 
+                 class="w-full bg-slate-900/80 border border-slate-800 text-slate-200 placeholder-slate-500 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-slate-700 transition">
+        </div>
+
+        <!-- LISTA DE MOVIMIENTOS -->
+        <div class="bg-slate-900/40 rounded-2xl border border-slate-800/80 divide-y divide-slate-800/60 overflow-hidden">
+          <div v-if="movimientosFiltrados.length === 0" class="p-6 text-center text-slate-500 text-xs">
+            No se encontraron movimientos para los filtros seleccionados.
+          </div>
+          <div v-for="(item, idx) in movimientosFiltrados" :key="idx" class="p-3.5 flex justify-between items-center hover:bg-slate-900/80 transition">
+            <div class="pr-3 min-w-0">
+              <p class="text-xs font-semibold text-slate-200 truncate">{{ item.descripcion }}</p>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <span class="text-[10px] text-slate-500 font-mono">{{ item.fecha }}</span>
+                <span v-if="item.ciudad" class="text-[10px] text-slate-600">• {{ item.ciudad }}</span>
+              </div>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <span :class="item.tipo === 'Abono' ? 'text-emerald-400 font-bold' : 'text-slate-200 font-semibold'" class="text-xs">
+                {{ item.tipo === 'Abono' ? '+' : '-' }}{{ formatCLP(Math.abs(item.monto)) }}
+              </span>
+              <span class="text-[9px] block font-bold uppercase tracking-wider mt-0.5" :class="item.tipo === 'Abono' ? 'text-emerald-500/80' : 'text-slate-500'">
+                {{ item.tipo }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </main>
+    </template>
+
+  </div>
+
+  <script>
+    const { createApp, ref, computed, watch, nextTick, onMounted } = Vue;
+
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwDbk6232lk5wgfhORW7hnjndydSOaO3qecF5byZW-SFnHUXCrB7QC7tXUX7B5VS8teYA/exec';
+
+    createApp({
+      setup() {
+        const authenticated = ref(false);
+        const pinInput = ref('');
+        const activePin = ref('');
+        const errorMessage = ref('');
+        const loading = ref(false);
+        const data = ref({});
+        const filtroFecha = ref('dia');
+        const busqueda = ref('');
+        const fechaFiltro = ref(new Date().toISOString().substring(0, 10));
+        
+        // Estado del gráfico
+        const modoGrafico = ref('dia'); // 'dia' | 'mes'
+        let chartInstance = null;
+
+        onMounted(async () => {
+          const storedPin = sessionStorage.getItem('scotia_pin');
+          if (storedPin) {
+            activePin.value = storedPin;
+            await fetchData(storedPin);
+          }
+        });
+
+        const fetchData = async (pin) => {
+          loading.value = true;
+          errorMessage.value = '';
+
+          try {
+            const response = await fetch(GOOGLE_SCRIPT_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({
+                pin: pin,
+                exec: 'READ'
+              })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              authenticated.value = true;
+              data.value = result.data || {};
+              sessionStorage.setItem('scotia_pin', pin);
+
+              if (data.value.movimientos && data.value.movimientos.length > 0) {
+                fechaFiltro.value = data.value.movimientos[0].fecha;
+              }
+
+              nextTick(() => {
+                renderChart();
+              });
+            } else {
+              errorMessage.value = result.error || 'Unauthorized access.';
+              logout();
+            }
+          } catch (e) {
+            errorMessage.value = 'An unexpected error occurred.';
+            logout();
+          } finally {
+            loading.value = false;
+          }
+        };
+
+        const login = async () => {
+          if (!pinInput.value) return;
+          activePin.value = pinInput.value;
+          await fetchData(pinInput.value);
+          pinInput.value = '';
+        };
+
+        const logout = () => {
+          sessionStorage.removeItem('scotia_pin');
+          authenticated.value = false;
+          activePin.value = '';
+          data.value = {};
+          if (chartInstance) chartInstance.destroy();
+        };
+
+        // Formateadores
+        const formatCLP = (val) => val ? new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(val) : '$0';
+        const formatNumber = (val) => val ? new Intl.NumberFormat('es-CL').format(val) : '0';
+
+        // LÓGICA DE CÁLCULO PARA EL GRÁFICO (ÚLTIMOS 6 PUNTOS)
+        const datosGrafico = computed(() => {
+          const movs = data.value.movimientos || [];
+          const refDate = new Date(fechaFiltro.value || new Date());
+          const labels = [];
+          const values = [];
+
+          if (modoGrafico.value === 'dia') {
+            // Generar 6 días retrospectivos partiendo del día seleccionado
+            for (let i = 5; i >= 0; i--) {
+              const d = new Date(refDate);
+              d.setDate(d.getDate() - i);
+              const isoDay = d.toISOString().substring(0, 10);
+              
+              const totalDia = movs
+                .filter(m => m.fecha === isoDay && (m.tipo === 'Cargo' || m.monto < 0))
+                .reduce((acc, m) => acc + Math.abs(m.monto), 0);
+
+              labels.push(isoDay.substring(5)); // Formato "MM-DD"
+              values.push(totalDia);
+            }
+          } else {
+            // Generar 6 meses retrospectivos partiendo del mes seleccionado
+            for (let i = 5; i >= 0; i--) {
+              const d = new Date(refDate.getFullYear(), refDate.getMonth() - i, 1);
+              const year = d.getFullYear();
+              const month = String(d.getMonth() + 1).padStart(2, '0');
+              const isoMonth = `${year}-${month}`;
+
+              const totalMes = movs
+                .filter(m => m.fecha.startsWith(isoMonth) && (m.tipo === 'Cargo' || m.monto < 0))
+                .reduce((acc, m) => acc + Math.abs(m.monto), 0);
+
+              const monthLabel = d.toLocaleString('es-CL', { month: 'short' }).replace('.', '');
+              labels.push(monthLabel.toUpperCase());
+              values.push(totalMes);
+            }
+          }
+
+          return { labels, values };
+        });
+
+        // RENDERIZADO DEL GRÁFICO (Chart.js)
+        const renderChart = () => {
+          const ctx = document.getElementById('chartVariacion');
+          if (!ctx) return;
+
+          if (chartInstance) {
+            chartInstance.destroy();
+          }
+
+          const { labels, values } = datosGrafico.value;
+
+          chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: labels,
+              datasets: [{
+                label: 'Gastos ($)',
+                data: values,
+                borderColor: '#10b981', // Emerald 500
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.35, // Curvatura de la línea
+                pointBackgroundColor: '#10b981',
+                pointRadius: 4,
+                pointHoverRadius: 6
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  callbacks: {
+                    label: (context) => formatCLP(context.raw)
+                  }
+                }
+              },
+              scales: {
+                x: {
+                  grid: { display: false },
+                  ticks: { color: '#64748b', font: { size: 10 } }
+                },
+                y: {
+                  display: false, // Ocultar eje Y para vista minimalista
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+        };
+
+        // Observadores para re-renderizar el gráfico ante cambios de filtro
+        watch([modoGrafico, fechaFiltro, data], () => {
+          if (authenticated.value) {
+            nextTick(() => renderChart());
+          }
+        });
+
+        // Computados adicionales
+        const mesAnioSeleccionado = computed(() => fechaFiltro.value ? fechaFiltro.value.substring(0, 7) : '');
+
+        const mesAnioTexto = computed(() => {
+          if (!fechaFiltro.value) return '';
+          const [year, month] = fechaFiltro.value.split('-');
+          const date = new Date(year, month - 1);
+          return date.toLocaleString('es-CL', { month: 'short', year: 'numeric' });
+        });
+
+        const gastosDiaSeleccionado = computed(() => {
+          const movs = data.value.movimientos || [];
+          return movs
+            .filter(m => m.fecha === fechaFiltro.value && (m.tipo === 'Cargo' || m.monto < 0))
+            .reduce((acc, m) => acc + Math.abs(m.monto), 0);
+        });
+
+        const gastosMesSeleccionado = computed(() => {
+          const movs = data.value.movimientos || [];
+          const prefijoMes = mesAnioSeleccionado.value;
+          return movs
+            .filter(m => m.fecha.startsWith(prefijoMes) && (m.tipo === 'Cargo' || m.monto < 0))
+            .reduce((acc, m) => acc + Math.abs(m.monto), 0);
+        });
+
+        const totalTransaccionesMes = computed(() => {
+          const movs = data.value.movimientos || [];
+          const prefijoMes = mesAnioSeleccionado.value;
+          return movs.filter(m => m.fecha.startsWith(prefijoMes)).length;
+        });
+
+        const movimientosFiltrados = computed(() => {
+          let list = data.value.movimientos || [];
+
+          if (filtroFecha.value === 'dia') {
+            list = list.filter(m => m.fecha === fechaFiltro.value);
+          } else if (filtroFecha.value === 'mes') {
+            const prefijoMes = mesAnioSeleccionado.value;
+            list = list.filter(m => m.fecha.startsWith(prefijoMes));
+          }
+
+          if (busqueda.value.trim() !== '') {
+            const q = busqueda.value.toLowerCase();
+            list = list.filter(m => 
+              m.descripcion.toLowerCase().includes(q) || 
+              (m.ciudad && m.ciudad.toLowerCase().includes(q))
+            );
+          }
+          return list;
+        });
+
+        return {
+          authenticated, pinInput, errorMessage, loading, data, filtroFecha, busqueda, fechaFiltro,
+          modoGrafico, mesAnioTexto, gastosDiaSeleccionado, gastosMesSeleccionado, totalTransaccionesMes, movimientosFiltrados,
+          login, logout, formatCLP, formatNumber
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
