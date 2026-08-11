@@ -38,7 +38,6 @@
             type="password" 
             inputmode="numeric" 
             pattern="[0-9]*"
-            :disabled="loading"
             maxlength="8" 
             placeholder="PIN" 
             autofocus
@@ -69,7 +68,7 @@
           </button>
         </div>
 
-        <!-- RESUMEN DE CUPO -->
+        <!-- RESUMEN DE CUPO (FIJO - MES EN CURSO) -->
         <div class="bg-gradient-to-br from-slate-900 to-slate-800 p-4 rounded-2xl border border-slate-700/60 shadow-lg">
           <div class="flex justify-between items-baseline mb-1">
             <span class="text-xs font-medium text-slate-400">Cupo Utilizado ({{ data.balances?.porcentaje_uso || 0 }}%)</span>
@@ -97,72 +96,12 @@
       <!-- CONTENIDO PRINCIPAL -->
       <main class="p-4 flex-1 space-y-4 overflow-y-auto no-scrollbar pb-12">
         
-        <!-- SECCIÓN DE GRÁFICO DE VARIACIÓN DE GASTOS -->
-        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80 shadow-sm space-y-3">
-          <div class="flex justify-between items-center">
-            <div>
-              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Variación de Gastos</h3>
-              <p class="text-[10px] text-slate-500">Últimos 6 {{ modoGrafico === 'dia' ? 'días' : 'meses' }} acumulados</p>
-            </div>
-            <!-- Toggle Día / Mes -->
-            <div class="flex bg-slate-950 p-0.5 rounded-xl border border-slate-800 text-[10px] font-medium">
-              <button 
-                @click="modoGrafico = 'dia'" 
-                :class="modoGrafico === 'dia' ? 'bg-emerald-600 text-white font-bold shadow' : 'text-slate-400'" 
-                class="px-2.5 py-1 rounded-lg transition">
-                Día
-              </button>
-              <button 
-                @click="modoGrafico = 'mes'" 
-                :class="modoGrafico === 'mes' ? 'bg-emerald-600 text-white font-bold shadow' : 'text-slate-400'" 
-                class="px-2.5 py-1 rounded-lg transition">
-                Mes
-              </button>
-            </div>
-          </div>
-
-          <!-- Canvas para Chart.js -->
-          <div class="h-36 w-full relative">
-            <canvas id="chartVariacion"></canvas>
-          </div>
-        </div>
-
-        <!-- CONTROL DE FECHA DE REFERENCIA -->
-        <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800 flex items-center justify-between gap-3">
-          <div class="flex items-center gap-2">
-            <span class="text-base">📅</span>
-            <div>
-              <span class="text-[10px] font-semibold text-slate-400 block leading-tight">FECHA CONSULTADA</span>
-              <span class="text-xs font-mono text-emerald-400">{{ fechaFiltro }}</span>
-            </div>
-          </div>
-          <input 
-            type="date" 
-            v-model="fechaFiltro"
-            class="bg-slate-950 text-slate-200 border border-slate-800 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 font-mono transition">
-        </div>
-
-        <!-- TARJETAS DE GASTOS -->
-        <div class="grid grid-cols-2 gap-3">
-          <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 shadow-sm">
-            <span class="text-[11px] font-medium text-slate-400 block mb-1">Gastado en la Fecha</span>
-            <p class="text-lg font-bold text-white tracking-tight">{{ formatCLP(gastosDiaSeleccionado) }}</p>
-            <span class="text-[10px] text-slate-500 font-mono mt-0.5 block">{{ fechaFiltro }}</span>
-          </div>
-
-          <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 shadow-sm">
-            <span class="text-[11px] font-medium text-slate-400 block mb-1">Gastos del Mes</span>
-            <p class="text-lg font-bold text-white tracking-tight">{{ formatCLP(gastosMesSeleccionado) }}</p>
-            <span class="text-[10px] text-slate-500 block mt-0.5">{{ totalTransaccionesMes }} movs. en {{ mesAnioTexto }}</span>
-          </div>
-        </div>
-
-        <!-- COMPONENTE: PROYECTOR DE GASTO MES (CALENDARIO CON ALINEACIÓN REAL) -->
+        <!-- COMPONENTE: PROYECTOR DE GASTO MES ACTUAL (FIJO EN SECCIÓN SUPERIOR) -->
         <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80 shadow-sm space-y-3">
           <div class="flex justify-between items-center">
             <div>
               <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">
-                Presupuesto {{ mesAnioTexto }}
+                Presupuesto {{ mesAnioTextoActual }}
               </h3>
               <p class="text-[10px] text-slate-500">
                 Comprometido: <span class="font-semibold text-slate-300">{{ formatCLP(montoComprometidoActual) }}</span> 
@@ -182,10 +121,10 @@
             </span>
           </div>
 
-          <!-- GRILLA DEL MES (CON DESFASE DE INICIO DE MES) -->
+          <!-- GRILLA DEL MES ACTUAL (CON DESFASE DE INICIO DE MES) -->
           <div class="grid grid-cols-7 gap-1.5">
             
-            <!-- ESPACIOS VACÍOS PARA ALINEAR EL DÍA 1 AL DÍA REAL DE LA SEMANA -->
+            <!-- ESPACIOS VACÍOS PARA ALINEAR EL DÍA 1 -->
             <div v-for="offset in proyeccionMes.diasOffset" :key="'offset-' + offset" class="h-7"></div>
 
             <!-- DÍAS DEL MES -->
@@ -211,7 +150,7 @@
               <span v-if="dia.esHoy" class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping"></span>
               <span v-if="dia.esHoy" class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-sky-400"></span>
 
-              <!-- Nivel de llenado en caso de ser día parcial -->
+              <!-- Nivel de llenado si es parcial -->
               <div 
                 v-if="dia.esParcial" 
                 :class="dia.esFuturo ? 'bg-rose-500' : 'bg-emerald-500'"
@@ -241,6 +180,67 @@
               </span>
             </div>
             <span class="font-mono text-slate-400">${{ formatNumber(GASTO_CONFIG.SEMANA) }}/día</span>
+          </div>
+        </div>
+
+        <!-- DIVISOR/SECTOR HISTÓRICO (INICIO DE DATOS AFECTOS A FECHA) -->
+        <div class="pt-2 border-t border-slate-800/80"></div>
+
+        <!-- CONTROL DE FECHA DE REFERENCIA (SELECTOR HISTÓRICO) -->
+        <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <span class="text-base">📅</span>
+            <div>
+              <span class="text-[10px] font-semibold text-slate-400 block leading-tight">FECHA CONSULTADA</span>
+              <span class="text-xs font-mono text-emerald-400">{{ fechaFiltro }}</span>
+            </div>
+          </div>
+          <input 
+            type="date" 
+            v-model="fechaFiltro"
+            class="bg-slate-950 text-slate-200 border border-slate-800 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 font-mono transition">
+        </div>
+
+        <!-- SECCIÓN DE GRÁFICO DE VARIACIÓN DE GASTOS (AFECTO A FECHA SELECCIONADA) -->
+        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80 shadow-sm space-y-3">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Variación de Gastos</h3>
+              <p class="text-[10px] text-slate-500">Últimos 6 {{ modoGrafico === 'dia' ? 'días' : 'meses' }} acumulados</p>
+            </div>
+            <div class="flex bg-slate-950 p-0.5 rounded-xl border border-slate-800 text-[10px] font-medium">
+              <button 
+                @click="modoGrafico = 'dia'" 
+                :class="modoGrafico === 'dia' ? 'bg-emerald-600 text-white font-bold shadow' : 'text-slate-400'" 
+                class="px-2.5 py-1 rounded-lg transition">
+                Día
+              </button>
+              <button 
+                @click="modoGrafico = 'mes'" 
+                :class="modoGrafico === 'mes' ? 'bg-emerald-600 text-white font-bold shadow' : 'text-slate-400'" 
+                class="px-2.5 py-1 rounded-lg transition">
+                Mes
+              </button>
+            </div>
+          </div>
+
+          <div class="h-36 w-full relative">
+            <canvas id="chartVariacion"></canvas>
+          </div>
+        </div>
+
+        <!-- TARJETAS DE GASTOS (AFECTOS A FECHA SELECCIONADA) -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 shadow-sm">
+            <span class="text-[11px] font-medium text-slate-400 block mb-1">Gastado en la Fecha</span>
+            <p class="text-lg font-bold text-white tracking-tight">{{ formatCLP(gastosDiaSeleccionado) }}</p>
+            <span class="text-[10px] text-slate-500 font-mono mt-0.5 block">{{ fechaFiltro }}</span>
+          </div>
+
+          <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 shadow-sm">
+            <span class="text-[11px] font-medium text-slate-400 block mb-1">Gastos del Mes</span>
+            <p class="text-lg font-bold text-white tracking-tight">{{ formatCLP(gastosMesSeleccionado) }}</p>
+            <span class="text-[10px] text-slate-500 block mt-0.5">{{ totalTransaccionesMes }} movs. en {{ mesAnioTextoFiltro }}</span>
           </div>
         </div>
 
@@ -380,30 +380,33 @@
         const formatCLP = (val) => val ? new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(val) : '$0';
         const formatNumber = (val) => val ? new Intl.NumberFormat('es-CL').format(val) : '0';
 
-        // LÓGICA DEL PROYECTOR MENSUAL POR CALENDARIO REAL
+        // 1. MONTO COMPROMETIDO DESDE LA API (resumen_financiero > pago_comprometido)
         const montoComprometidoActual = computed(() => {
+          if (data.value.resumen_financiero?.pago_comprometido !== undefined && data.value.resumen_financiero?.pago_comprometido !== null) {
+            return Math.abs(data.value.resumen_financiero.pago_comprometido);
+          }
           if (data.value.pago_comprometido !== undefined && data.value.pago_comprometido !== null) {
             return Math.abs(data.value.pago_comprometido);
           }
-          return gastosMesSeleccionado.value;
+          return 0;
         });
 
+        // TEXTO DEL MES ACTUAL PARA EL TITULO
+        const mesAnioTextoActual = computed(() => {
+          const hoy = new Date();
+          return hoy.toLocaleString('es-CL', { month: 'long', year: 'numeric' });
+        });
+
+        // 2. PROYECTOR MENSUAL FIJO: SIEMPRE EVALÚA EL MES CALENDARIO EN CURSO
         const proyeccionMes = computed(() => {
-          if (!fechaFiltro.value) return { dias: [], diasOffset: 0, presupuestoTotal: 0, porcentajeConsumido: 0 };
-
-          const [yearStr, monthStr] = fechaFiltro.value.split('-');
-          const year = parseInt(yearStr, 10);
-          const month = parseInt(monthStr, 10);
-
-          const hoyObj = new Date();
-          const esMesActual = (hoyObj.getFullYear() === year) && ((hoyObj.getMonth() + 1) === month);
-          const diaHoyNum = esMesActual ? hoyObj.getDate() : (hoyObj.getFullYear() > year || (hoyObj.getFullYear() === year && (hoyObj.getMonth() + 1) > month) ? 99 : 0);
+          const hoy = new Date();
+          const year = hoy.getFullYear();
+          const month = hoy.getMonth() + 1; // 1-12
+          const diaHoyNum = hoy.getDate();
 
           const totalDiasMes = new Date(year, month, 0).getDate();
 
-          // CALCULAR EL DESFASE DEL DÍA 1
-          // getDay(): 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
-          // Para grilla Lunes-Domingo: Lunes = 0, Martes = 1, ..., Domingo = 6
+          // Calcular desfase para grilla Lunes-Domingo
           const primerDiaObj = new Date(year, month - 1, 1);
           const diaSemanaPrimerDia = primerDiaObj.getDay(); 
           const diasOffset = (diaSemanaPrimerDia === 0) ? 6 : diaSemanaPrimerDia - 1;
@@ -411,15 +414,14 @@
           let presupuestoTotal = 0;
           const estructuraDias = [];
 
-          // 1. Estructurar días e identificar pasados/hoy vs futuros
+          // Construcción de días del mes en curso
           for (let d = 1; d <= totalDiasMes; d++) {
             const fechaObj = new Date(year, month - 1, d);
             const diaSemana = fechaObj.getDay();
             const esFinDeSemana = (diaSemana === 0 || diaSemana === 6);
             const cupoDia = esFinDeSemana ? GASTO_CONFIG.FIN_SEMANA : GASTO_CONFIG.SEMANA;
-            const esHoy = (esMesActual && d === diaHoyNum);
-            
-            const esFuturo = esMesActual ? (d > diaHoyNum) : (!esMesActual && hoyObj < fechaObj);
+            const esHoy = (d === diaHoyNum);
+            const esFuturo = (d > diaHoyNum);
 
             presupuestoTotal += cupoDia;
 
@@ -435,7 +437,7 @@
             });
           }
 
-          // 2. Consumir el 'pago_comprometido' a lo largo del mes
+          // Consumir el 'pago_comprometido' a lo largo del mes actual
           let remanenteGasto = montoComprometidoActual.value;
 
           for (let i = 0; i < estructuraDias.length; i++) {
@@ -465,7 +467,7 @@
           };
         });
 
-        // LÓGICA DE CÁLCULO PARA EL GRÁFICO (ÚLTIMOS 6 PUNTOS)
+        // LÓGICA DE CÁLCULO PARA EL GRÁFICO (ÚLTIMOS 6 PUNTOS SEGÚN FECHA FILTRO)
         const datosGrafico = computed(() => {
           const movs = data.value.movimientos || [];
           const refDate = new Date(fechaFiltro.value || new Date());
@@ -561,10 +563,10 @@
           }
         });
 
-        // Computados adicionales
+        // COMPUTADOS AFECTOS A LA FECHA SELECCIONADA EN EL FILTRO
         const mesAnioSeleccionado = computed(() => fechaFiltro.value ? fechaFiltro.value.substring(0, 7) : '');
 
-        const mesAnioTexto = computed(() => {
+        const mesAnioTextoFiltro = computed(() => {
           if (!fechaFiltro.value) return '';
           const [year, month] = fechaFiltro.value.split('-');
           const date = new Date(year, month - 1);
@@ -614,8 +616,8 @@
 
         return {
           authenticated, pinInput, errorMessage, loading, data, filtroFecha, busqueda, fechaFiltro,
-          modoGrafico, mesAnioTexto, gastosDiaSeleccionado, gastosMesSeleccionado, totalTransaccionesMes, movimientosFiltrados,
-          GASTO_CONFIG, montoComprometidoActual, proyeccionMes,
+          modoGrafico, mesAnioTextoActual, mesAnioTextoFiltro, gastosDiaSeleccionado, gastosMesSeleccionado, 
+          totalTransaccionesMes, movimientosFiltrados, GASTO_CONFIG, montoComprometidoActual, proyeccionMes,
           login, logout, formatCLP, formatNumber
         };
       }
