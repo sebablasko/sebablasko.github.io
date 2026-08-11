@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BankBalance</title>
+  <title>Scotia Tracker — Acceso Seguro</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <!-- Chart.js para el gráfico de variación de gastos -->
@@ -28,7 +28,7 @@
       <div class="w-16 h-16 bg-slate-900 rounded-2xl border border-slate-800 flex items-center justify-center text-2xl mb-4 shadow-lg">
         🔒
       </div>
-      <h1 class="text-xl font-bold text-white mb-1">BankBalance</h1>
+      <h1 class="text-xl font-bold text-white mb-1">Scotia Tracker</h1>
       <p class="text-xs text-slate-400 mb-6">Enter your PIN code to access information</p>
 
       <form @submit.prevent="login" class="w-full max-w-xs space-y-4">
@@ -38,6 +38,7 @@
             type="password" 
             inputmode="numeric" 
             pattern="[0-9]*"
+            :disabled="loading"
             maxlength="8" 
             placeholder="PIN" 
             autofocus
@@ -61,7 +62,7 @@
         <div class="flex justify-between items-center mb-3">
           <div class="flex items-center gap-2">
             <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-            <span class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Sebastian Bank Balance</span>
+            <span class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Scotia Consolidator</span>
           </div>
           <button @click="logout" class="text-[10px] text-slate-400 hover:text-red-400 bg-slate-800 px-2 py-1 rounded-md font-mono transition">
             🔒 Salir
@@ -156,6 +157,93 @@
           </div>
         </div>
 
+        <!-- COMPONENTE: PROYECTOR DE GASTO MES (CALENDARIO CON ALINEACIÓN REAL) -->
+        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80 shadow-sm space-y-3">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">
+                Presupuesto {{ mesAnioTexto }}
+              </h3>
+              <p class="text-[10px] text-slate-500">
+                Comprometido: <span class="font-semibold text-slate-300">{{ formatCLP(montoComprometidoActual) }}</span> 
+                / Presupuestado: <span class="font-semibold text-slate-400">{{ formatCLP(proyeccionMes.presupuestoTotal) }}</span>
+              </p>
+            </div>
+            <span class="text-xs font-mono font-bold" 
+                  :class="proyeccionMes.porcentajeConsumido > 100 ? 'text-rose-400' : 'text-emerald-400'">
+              {{ proyeccionMes.porcentajeConsumido }}%
+            </span>
+          </div>
+
+          <!-- CABECERA DE DÍAS DE LA SEMANA -->
+          <div class="grid grid-cols-7 gap-1.5 text-center">
+            <span v-for="d in ['L', 'M', 'X', 'J', 'V', 'S', 'D']" :key="d" class="text-[9px] font-bold font-mono text-slate-500 uppercase">
+              {{ d }}
+            </span>
+          </div>
+
+          <!-- GRILLA DEL MES (CON DESFASE DE INICIO DE MES) -->
+          <div class="grid grid-cols-7 gap-1.5">
+            
+            <!-- ESPACIOS VACÍOS PARA ALINEAR EL DÍA 1 AL DÍA REAL DE LA SEMANA -->
+            <div v-for="offset in proyeccionMes.diasOffset" :key="'offset-' + offset" class="h-7"></div>
+
+            <!-- DÍAS DEL MES -->
+            <div 
+              v-for="dia in proyeccionMes.dias" 
+              :key="dia.numeroDia"
+              :title="`Día ${dia.numeroDia}${dia.esHoy ? ' (HOY)' : ''}: Cupo ${formatCLP(dia.cupoDia)} ${dia.esFuturo ? '[Día Futuro]' : '[Día Pasado/Hoy]'}`"
+              class="h-7 rounded-md transition-all duration-300 flex flex-col justify-end overflow-hidden relative group border"
+              :class="[
+                dia.esHoy ? 'ring-2 ring-sky-400 ring-offset-1 ring-offset-slate-950 z-10' : '',
+                dia.cubiertoCompletamente ? (dia.esFuturo ? 'bg-rose-500 border-rose-400/50 shadow-sm shadow-rose-900/40' : 'bg-emerald-500 border-emerald-400/50 shadow-sm shadow-emerald-900/40') : 
+                dia.esParcial ? (dia.esFuturo ? 'bg-slate-800/80 border-rose-400/80' : 'bg-slate-800/80 border-emerald-400/80') : 
+                'bg-slate-800/40 border-slate-800/80'
+              ]">
+              
+              <!-- Número del día -->
+              <span class="absolute top-0.5 left-1 text-[8px] font-mono leading-none font-bold"
+                    :class="dia.cubiertoCompletamente ? 'text-slate-950/80' : 'text-slate-400'">
+                {{ dia.numeroDia }}
+              </span>
+
+              <!-- Indicador visual de "Hoy" -->
+              <span v-if="dia.esHoy" class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping"></span>
+              <span v-if="dia.esHoy" class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+
+              <!-- Nivel de llenado en caso de ser día parcial -->
+              <div 
+                v-if="dia.esParcial" 
+                :class="dia.esFuturo ? 'bg-rose-500' : 'bg-emerald-500'"
+                class="w-full transition-all duration-300" 
+                :style="{ height: dia.porcentajeLlenado + '%' }">
+              </div>
+
+              <!-- Indicador de Fin de Semana -->
+              <span v-if="dia.esFinDeSemana && !dia.esHoy && !dia.cubiertoCompletamente" class="absolute bottom-0.5 right-0.5 w-1 h-1 rounded-full bg-amber-400/70"></span>
+            </div>
+          </div>
+
+          <!-- LEYENDA DEL COMPONENTE -->
+          <div class="flex justify-between items-center text-[9px] text-slate-500 pt-1 border-t border-slate-800/60">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-sky-400"></span> Hoy
+              </span>
+              <span class="flex items-center gap-1">
+                <span class="w-2 h-2 bg-emerald-500 rounded-sm"></span> Al día
+              </span>
+              <span class="flex items-center gap-1">
+                <span class="w-2 h-2 bg-rose-500 rounded-sm"></span> Adelantado
+              </span>
+              <span class="flex items-center gap-1">
+                <span class="w-2 h-2 bg-slate-800/60 border border-slate-700 rounded-sm"></span> Disp.
+              </span>
+            </div>
+            <span class="font-mono text-slate-400">${{ formatNumber(GASTO_CONFIG.SEMANA) }}/día</span>
+          </div>
+        </div>
+
         <!-- BUSCADOR Y FILTROS -->
         <div class="space-y-2">
           <div class="flex items-center justify-between">
@@ -203,6 +291,12 @@
 
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwDbk6232lk5wgfhORW7hnjndydSOaO3qecF5byZW-SFnHUXCrB7QC7tXUX7B5VS8teYA/exec';
 
+    // PARÁMETROS CONFIGURABLES DE PRESUPUESTO DIARIO
+    const GASTO_CONFIG = {
+      SEMANA: 50000,      // Lunes a Viernes
+      FIN_SEMANA: 100000  // Sábado y Domingo
+    };
+
     createApp({
       setup() {
         const authenticated = ref(false);
@@ -216,11 +310,11 @@
         const fechaFiltro = ref(new Date().toISOString().substring(0, 10));
         
         // Estado del gráfico
-        const modoGrafico = ref('dia'); // 'dia' | 'mes'
+        const modoGrafico = ref('dia');
         let chartInstance = null;
 
         onMounted(async () => {
-          const storedPin = sessionStorage.getItem('bank_balance_pin');
+          const storedPin = sessionStorage.getItem('scotia_pin');
           if (storedPin) {
             activePin.value = storedPin;
             await fetchData(storedPin);
@@ -246,7 +340,7 @@
             if (result.success) {
               authenticated.value = true;
               data.value = result.data || {};
-              sessionStorage.setItem('bank_balance_pin', pin);
+              sessionStorage.setItem('scotia_pin', pin);
 
               if (data.value.movimientos && data.value.movimientos.length > 0) {
                 fechaFiltro.value = data.value.movimientos[0].fecha;
@@ -275,7 +369,7 @@
         };
 
         const logout = () => {
-          sessionStorage.removeItem('bank_balance_pin');
+          sessionStorage.removeItem('scotia_pin');
           authenticated.value = false;
           activePin.value = '';
           data.value = {};
@@ -286,6 +380,91 @@
         const formatCLP = (val) => val ? new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(val) : '$0';
         const formatNumber = (val) => val ? new Intl.NumberFormat('es-CL').format(val) : '0';
 
+        // LÓGICA DEL PROYECTOR MENSUAL POR CALENDARIO REAL
+        const montoComprometidoActual = computed(() => {
+          if (data.value.pago_comprometido !== undefined && data.value.pago_comprometido !== null) {
+            return Math.abs(data.value.pago_comprometido);
+          }
+          return gastosMesSeleccionado.value;
+        });
+
+        const proyeccionMes = computed(() => {
+          if (!fechaFiltro.value) return { dias: [], diasOffset: 0, presupuestoTotal: 0, porcentajeConsumido: 0 };
+
+          const [yearStr, monthStr] = fechaFiltro.value.split('-');
+          const year = parseInt(yearStr, 10);
+          const month = parseInt(monthStr, 10);
+
+          const hoyObj = new Date();
+          const esMesActual = (hoyObj.getFullYear() === year) && ((hoyObj.getMonth() + 1) === month);
+          const diaHoyNum = esMesActual ? hoyObj.getDate() : (hoyObj.getFullYear() > year || (hoyObj.getFullYear() === year && (hoyObj.getMonth() + 1) > month) ? 99 : 0);
+
+          const totalDiasMes = new Date(year, month, 0).getDate();
+
+          // CALCULAR EL DESFASE DEL DÍA 1
+          // getDay(): 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+          // Para grilla Lunes-Domingo: Lunes = 0, Martes = 1, ..., Domingo = 6
+          const primerDiaObj = new Date(year, month - 1, 1);
+          const diaSemanaPrimerDia = primerDiaObj.getDay(); 
+          const diasOffset = (diaSemanaPrimerDia === 0) ? 6 : diaSemanaPrimerDia - 1;
+
+          let presupuestoTotal = 0;
+          const estructuraDias = [];
+
+          // 1. Estructurar días e identificar pasados/hoy vs futuros
+          for (let d = 1; d <= totalDiasMes; d++) {
+            const fechaObj = new Date(year, month - 1, d);
+            const diaSemana = fechaObj.getDay();
+            const esFinDeSemana = (diaSemana === 0 || diaSemana === 6);
+            const cupoDia = esFinDeSemana ? GASTO_CONFIG.FIN_SEMANA : GASTO_CONFIG.SEMANA;
+            const esHoy = (esMesActual && d === diaHoyNum);
+            
+            const esFuturo = esMesActual ? (d > diaHoyNum) : (!esMesActual && hoyObj < fechaObj);
+
+            presupuestoTotal += cupoDia;
+
+            estructuraDias.push({
+              numeroDia: d,
+              esFinDeSemana,
+              cupoDia,
+              esHoy,
+              esFuturo,
+              cubiertoCompletamente: false,
+              esParcial: false,
+              porcentajeLlenado: 0
+            });
+          }
+
+          // 2. Consumir el 'pago_comprometido' a lo largo del mes
+          let remanenteGasto = montoComprometidoActual.value;
+
+          for (let i = 0; i < estructuraDias.length; i++) {
+            const dia = estructuraDias[i];
+
+            if (remanenteGasto >= dia.cupoDia) {
+              dia.cubiertoCompletamente = true;
+              remanenteGasto -= dia.cupoDia;
+            } else if (remanenteGasto > 0) {
+              dia.esParcial = true;
+              dia.porcentajeLlenado = Math.round((remanenteGasto / dia.cupoDia) * 100);
+              remanenteGasto = 0;
+            } else {
+              break;
+            }
+          }
+
+          const porcentajeConsumido = presupuestoTotal > 0 
+            ? Math.round((montoComprometidoActual.value / presupuestoTotal) * 100) 
+            : 0;
+
+          return {
+            dias: estructuraDias,
+            diasOffset,
+            presupuestoTotal,
+            porcentajeConsumido
+          };
+        });
+
         // LÓGICA DE CÁLCULO PARA EL GRÁFICO (ÚLTIMOS 6 PUNTOS)
         const datosGrafico = computed(() => {
           const movs = data.value.movimientos || [];
@@ -294,7 +473,6 @@
           const values = [];
 
           if (modoGrafico.value === 'dia') {
-            // Generar 6 días retrospectivos partiendo del día seleccionado
             for (let i = 5; i >= 0; i--) {
               const d = new Date(refDate);
               d.setDate(d.getDate() - i);
@@ -304,11 +482,10 @@
                 .filter(m => m.fecha === isoDay && (m.tipo === 'Cargo' || m.monto < 0))
                 .reduce((acc, m) => acc + Math.abs(m.monto), 0);
 
-              labels.push(isoDay.substring(5)); // Formato "MM-DD"
+              labels.push(isoDay.substring(5));
               values.push(totalDia);
             }
           } else {
-            // Generar 6 meses retrospectivos partiendo del mes seleccionado
             for (let i = 5; i >= 0; i--) {
               const d = new Date(refDate.getFullYear(), refDate.getMonth() - i, 1);
               const year = d.getFullYear();
@@ -328,14 +505,11 @@
           return { labels, values };
         });
 
-        // RENDERIZADO DEL GRÁFICO (Chart.js)
         const renderChart = () => {
           const ctx = document.getElementById('chartVariacion');
           if (!ctx) return;
 
-          if (chartInstance) {
-            chartInstance.destroy();
-          }
+          if (chartInstance) chartInstance.destroy();
 
           const { labels, values } = datosGrafico.value;
 
@@ -346,11 +520,11 @@
               datasets: [{
                 label: 'Gastos ($)',
                 data: values,
-                borderColor: '#10b981', // Emerald 500
+                borderColor: '#10b981',
                 backgroundColor: 'rgba(16, 185, 129, 0.1)',
                 borderWidth: 2,
                 fill: true,
-                tension: 0.35, // Curvatura de la línea
+                tension: 0.35,
                 pointBackgroundColor: '#10b981',
                 pointRadius: 4,
                 pointHoverRadius: 6
@@ -373,7 +547,7 @@
                   ticks: { color: '#64748b', font: { size: 10 } }
                 },
                 y: {
-                  display: false, // Ocultar eje Y para vista minimalista
+                  display: false,
                   beginAtZero: true
                 }
               }
@@ -381,7 +555,6 @@
           });
         };
 
-        // Observadores para re-renderizar el gráfico ante cambios de filtro
         watch([modoGrafico, fechaFiltro, data], () => {
           if (authenticated.value) {
             nextTick(() => renderChart());
@@ -395,7 +568,7 @@
           if (!fechaFiltro.value) return '';
           const [year, month] = fechaFiltro.value.split('-');
           const date = new Date(year, month - 1);
-          return date.toLocaleString('es-CL', { month: 'short', year: 'numeric' });
+          return date.toLocaleString('es-CL', { month: 'long', year: 'numeric' });
         });
 
         const gastosDiaSeleccionado = computed(() => {
@@ -442,6 +615,7 @@
         return {
           authenticated, pinInput, errorMessage, loading, data, filtroFecha, busqueda, fechaFiltro,
           modoGrafico, mesAnioTexto, gastosDiaSeleccionado, gastosMesSeleccionado, totalTransaccionesMes, movimientosFiltrados,
+          GASTO_CONFIG, montoComprometidoActual, proyeccionMes,
           login, logout, formatCLP, formatNumber
         };
       }
