@@ -339,6 +339,11 @@
             await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable());
         };
 
+        // ArrayBuffer a Base64 helper
+        const bufferToBase64 = (buffer) => btoa(String.fromCharCode(...new Uint8Array(buffer)));
+        // Base64 a Uint8Array helper
+        const base64ToBuffer = (base64) => Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+
         const registrarHuella = async (pin) => {
           try {
             const challenge = new Uint8Array(32);
@@ -348,67 +353,78 @@
               challenge: challenge,
               rp: { name: "BankBalance" },
               user: {
-                id: Uint8Array.from("pin_bank_balance", c => c.charCodeAt(0)),
-                name: "pin@bankbalance",
-                displayName: "Pin BankBalance"
+                id: Uint8Array.from("user_bank_balance", c => c.charCodeAt(0)),
+                name: "seba@bankbalance",
+                displayName: "Seba BankBalance"
               },
-              pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+              pubKeyCredParams: [
+                { alg: -7, type: "public-key" },  // ES256
+                { alg: -257, type: "public-key" } // RS256
+              ],
               authenticatorSelection: {
                 authenticatorAttachment: "platform",
-                userVerification: "required"
+                userVerification: "preferred"
               },
               timeout: 60000
             };
 
             const credential = await navigator.credentials.create({ publicKey });
+            
             if (credential) {
+              // Guardamos tanto el PIN como el ID de la credencial generada
+              const credentialIdBase64 = bufferToBase64(credential.rawId);
+              
               localStorage.setItem('bankbalance_bio_pin', btoa(pin));
+              localStorage.setItem('bankbalance_bio_cred_id', credentialIdBase64);
               localStorage.setItem('bankbalance_bio_enabled', 'true');
+              
               vibrate(50);
               return true;
             }
           } catch (e) {
-            console.warn("Error o cancelación al enrolar biometría:", e);
+            console.error("Error al registrar la huella:", e);
+            alert("No se pudo completar el registro de la huella: " + e.message);
             return false;
           }
         };
 
         const autenticarConHuella = async () => {
           const storedEncryptedPin = localStorage.getItem('bankbalance_bio_pin');
-          if (!storedEncryptedPin) {
-            alert("No hay ningún PIN registrado con huella en este dispositivo.");
+          const storedCredId = localStorage.getItem('bankbalance_bio_cred_id');
+
+          if (!storedEncryptedPin || !storedCredId) {
+            alert("No hay una huella registrada correctamente en este dispositivo.");
             return null;
           }
 
-          // Verificación por WebAuthn API
           if (window.PublicKeyCredential) {
             try {
               const challenge = new Uint8Array(32);
               window.crypto.getRandomValues(challenge);
 
-              // Invocación nativa al lector biométrico
-              const credential = await navigator.credentials.get({
-                publicKey: {
-                  challenge: challenge,
-                  userVerification: "preferred", // 'preferred' es más flexible que 'required' en WebView/Android
-                  timeout: 60000
-                }
-              });
+              const publicKeyOptions = {
+                challenge: challenge,
+                userVerification: "preferred",
+                timeout: 60000,
+                // PASO CLAVE: Le indicamos explícitamente a Android qué credencial buscar
+                allowCredentials: [{
+                  id: base64ToBuffer(storedCredId),
+                  type: 'public-key'
+                }]
+              };
+
+              const credential = await navigator.credentials.get({ publicKey: publicKeyOptions });
 
               if (credential) {
                 return atob(storedEncryptedPin);
               }
             } catch (e) {
-              console.warn("Error en autenticación biométrica:", e);
-              
-              // Si la API falla o el usuario cancela, hacemos fallback manual
-              // Si prefieres que al fallar el sensor pida ingresar el PIN, el return null es correcto.
-              alert("No se pudo verificar la huella o se canceló el lector. Ingresa tu PIN manualmente.");
+              console.warn("Detalle del error en huella:", e);
+              alert("No se pudo verificar la huella o se canceló el lector. Ingresa tu PIN.");
               return null;
             }
           }
 
-          // Fallback para entornos donde no está disponible PublicKeyCredential
           return atob(storedEncryptedPin);
         };
 
