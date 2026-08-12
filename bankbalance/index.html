@@ -126,7 +126,7 @@
       <!-- CONTENIDO PRINCIPAL -->
       <main class="p-4 flex-1 space-y-4 overflow-y-auto no-scrollbar pb-12">
         
-        <!-- COMPONENTE: PROYECTOR DE GASTO MES ACTUAL (FIJO EN SECCIÓN SUPERIOR) -->
+        <!-- COMPONENTE: PROYECTOR DE GASTO MES ACTUAL -->
         <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80 shadow-sm space-y-3">
           <div class="flex justify-between items-center">
             <div>
@@ -153,15 +153,11 @@
 
           <!-- GRILLA DEL MES ACTUAL -->
           <div class="grid grid-cols-7 gap-1.5">
-            
-            <!-- ESPACIOS VACÍOS PARA ALINEAR EL DÍA 1 -->
             <div v-for="offset in proyeccionMes.diasOffset" :key="'offset-' + offset" class="h-7"></div>
-
-            <!-- DÍAS DEL MES -->
             <div 
               v-for="dia in proyeccionMes.dias" 
               :key="dia.numeroDia"
-              :title="`Día ${dia.numeroDia}${dia.esHoy ? ' (HOY)' : ''}: Cupo ${formatCLP(dia.cupoDia)} ${dia.esFuturo ? '[Día Futuro]' : '[Día Pasado/Hoy]'}`"
+              :title="`Día ${dia.numeroDia}${dia.esHoy ? ' (HOY)' : ''}: Cupo ${formatCLP(dia.cupoDia)}`"
               class="h-7 rounded-md transition-all duration-300 flex flex-col justify-end overflow-hidden relative group border"
               :class="[
                 dia.esHoy ? 'ring-2 ring-sky-400 ring-offset-1 ring-offset-slate-950 z-10' : '',
@@ -170,17 +166,14 @@
                 'bg-slate-800/40 border-slate-800/80'
               ]">
               
-              <!-- Número del día -->
               <span class="absolute top-0.5 left-1 text-[8px] font-mono leading-none font-bold"
                     :class="dia.cubiertoCompletamente ? 'text-slate-950/80' : 'text-slate-400'">
                 {{ dia.numeroDia }}
               </span>
 
-              <!-- Indicador visual de "Hoy" -->
               <span v-if="dia.esHoy" class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping"></span>
               <span v-if="dia.esHoy" class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-sky-400"></span>
 
-              <!-- Nivel de llenado si es parcial -->
               <div 
                 v-if="dia.esParcial" 
                 :class="dia.esFuturo ? 'bg-rose-500' : 'bg-emerald-500'"
@@ -188,7 +181,6 @@
                 :style="{ height: dia.porcentajeLlenado + '%' }">
               </div>
 
-              <!-- Indicador de Fin de Semana -->
               <span v-if="dia.esFinDeSemana && !dia.esHoy && !dia.cubiertoCompletamente" class="absolute bottom-0.5 right-0.5 w-1 h-1 rounded-full bg-amber-400/70"></span>
             </div>
           </div>
@@ -196,27 +188,18 @@
           <!-- LEYENDA DEL COMPONENTE -->
           <div class="flex justify-between items-center text-[9px] text-slate-500 pt-1 border-t border-slate-800/60">
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full bg-sky-400"></span> Hoy
-              </span>
-              <span class="flex items-center gap-1">
-                <span class="w-2 h-2 bg-emerald-500 rounded-sm"></span> Al día
-              </span>
-              <span class="flex items-center gap-1">
-                <span class="w-2 h-2 bg-rose-500 rounded-sm"></span> Adelantado
-              </span>
-              <span class="flex items-center gap-1">
-                <span class="w-2 h-2 bg-slate-800/60 border border-slate-700 rounded-sm"></span> Disp.
-              </span>
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400"></span> Hoy</span>
+              <span class="flex items-center gap-1"><span class="w-2 h-2 bg-emerald-500 rounded-sm"></span> Al día</span>
+              <span class="flex items-center gap-1"><span class="w-2 h-2 bg-rose-500 rounded-sm"></span> Adelantado</span>
+              <span class="flex items-center gap-1"><span class="w-2 h-2 bg-slate-800/60 border border-slate-700 rounded-sm"></span> Disp.</span>
             </div>
             <span class="font-mono text-slate-400">${{ formatNumber(GASTO_CONFIG.SEMANA) }}/día</span>
           </div>
         </div>
 
-        <!-- DIVISOR/SECTOR HISTÓRICO -->
         <div class="pt-2 border-t border-slate-800/80"></div>
 
-        <!-- CONTROL DE FECHA DE REFERENCIA (SELECTOR HISTÓRICO) -->
+        <!-- FECHA CONSULTADA -->
         <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800 flex items-center justify-between gap-3">
           <div class="flex items-center gap-2">
             <span class="text-base">📅</span>
@@ -231,7 +214,7 @@
             class="bg-slate-950 text-slate-200 border border-slate-800 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 font-mono transition">
         </div>
 
-        <!-- SECCIÓN DE GRÁFICO DE VARIACIÓN DE GASTOS -->
+        <!-- SECCIÓN DE GRÁFICO -->
         <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80 shadow-sm space-y-3">
           <div class="flex justify-between items-center">
             <div>
@@ -312,7 +295,7 @@
           </div>
         </div>
 
-        <!-- METADATA Y SINCRO EN EL FOOTER -->
+        <!-- METADATA EN EL FOOTER -->
         <div v-if="data.metadata?.timestamp" class="text-center pt-2">
           <span class="text-[9px] text-slate-600 font-mono">
             Última Sincronización: {{ formatTimestamp(data.metadata.timestamp) }}
@@ -350,42 +333,112 @@
         const modoGrafico = ref('dia');
         let chartInstance = null;
 
+        // Comprobación de Biometría
+        const soportaBiometria = async () => {
+          return !!(window.PublicKeyCredential && 
+            await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable());
+        };
+
+        const registrarHuella = async (pin) => {
+          try {
+            const challenge = new Uint8Array(32);
+            window.crypto.getRandomValues(challenge);
+
+            const publicKey = {
+              challenge: challenge,
+              rp: { name: "BankBalance" },
+              user: {
+                id: Uint8Array.from("pin_bank_balance", c => c.charCodeAt(0)),
+                name: "pin@bankbalance",
+                displayName: "Pin BankBalance"
+              },
+              pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+              authenticatorSelection: {
+                authenticatorAttachment: "platform",
+                userVerification: "required"
+              },
+              timeout: 60000
+            };
+
+            const credential = await navigator.credentials.create({ publicKey });
+            if (credential) {
+              localStorage.setItem('bankbalance_bio_pin', btoa(pin));
+              localStorage.setItem('bankbalance_bio_enabled', 'true');
+              vibrate(50);
+              return true;
+            }
+          } catch (e) {
+            console.warn("Error o cancelación al enrolar biometría:", e);
+            return false;
+          }
+        };
+
+        const autenticarConHuella = async () => {
+          try {
+            // Se recupera directamente la credencial guardada localmente tras el prompt
+            const storedEncryptedPin = localStorage.getItem('bankbalance_bio_pin');
+            if (!storedEncryptedPin) return null;
+
+            // Verificación por la API nativa de Android
+            if (window.PublicKeyCredential) {
+              const challenge = new Uint8Array(32);
+              window.crypto.getRandomValues(challenge);
+
+              // Solicitamos la verificación del usuario mediante el autenticador de plataforma
+              const credential = await navigator.credentials.get({
+                publicKey: {
+                  challenge: challenge,
+                  userVerification: "required",
+                  timeout: 60000
+                }
+              });
+
+              if (credential) {
+                return atob(storedEncryptedPin);
+              }
+            }
+            return atob(storedEncryptedPin);
+          } catch (e) {
+            console.warn("Autenticación biométrica no completada:", e);
+            return null;
+          }
+        };
+
         onMounted(async () => {
-          // 1. Registrar Service Worker PWA
+          // 1. Service Worker PWA
           if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js').then((reg) => {
               reg.addEventListener('updatefound', () => {
                 const newWorker = reg.installing;
                 newWorker.addEventListener('statechange', () => {
                   if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    // Detectó nueva versión instalada
-                    if (confirm('¡Nueva versión disponible con ingreso por huella! ¿Deseas actualizar ahora?')) {
+                    if (confirm('¡Nueva versión disponible! ¿Deseas actualizar ahora?')) {
                       window.location.reload();
                     }
                   }
                 });
               });
-            });
+            }).catch(() => {});
           }
 
-          // 2. Cargar datos del caché local inmediatamente (soporte offline)
+          // 2. Cargar caché local de datos
           const localCachedData = localStorage.getItem('bankbalance_last_data');
           if (localCachedData) {
             data.value = JSON.parse(localCachedData);
           }
 
-          // 3. Restaurar PIN y consultar
+          // 3. Restaurar sesión por PIN si existe en sessionStorage
           const storedPin = sessionStorage.getItem('app_pin');
           if (storedPin) {
             activePin.value = storedPin;
             await fetchData(storedPin);
           }
 
-          // Verificar soporte biométrico en Android
+          // 4. Evaluar biometría
           biometriaDisponible.value = await soportaBiometria();
           tieneHuellaHabilitada.value = localStorage.getItem('bankbalance_bio_enabled') === 'true';
 
-          // Si tiene la huella activa, intentar autenticar automáticamente al abrir la app
+          // Solicitar huella al abrir la app si está habilitada y no autenticado
           if (biometriaDisponible.value && tieneHuellaHabilitada.value && !authenticated.value) {
             await loginConHuella();
           }
@@ -420,7 +473,7 @@
               logout();
             }
           } catch (e) {
-            errorMessage.value = 'Ocurrió un error inesperado al consultar los datos.';
+            errorMessage.value = 'Error al consultar los datos.';
             logout();
           } finally {
             loading.value = false;
@@ -428,9 +481,7 @@
         };
 
         const vibrate = (ms = 15) => {
-          if ('vibrate' in navigator) {
-            navigator.vibrate(ms);
-          }
+          if ('vibrate' in navigator) navigator.vibrate(ms);
         };
 
         const login = async () => {
@@ -438,9 +489,8 @@
           activePin.value = pinInput.value;
           await fetchData(pinInput.value);
           
-          // Si el login fue exitoso y el dispositivo soporta huella pero aún no se ha activado:
           if (authenticated.value && biometriaDisponible.value && !tieneHuellaHabilitada.value) {
-            if (confirm("¿Deseas activar el ingreso rápido con Huella Dactilar para las próximas veces?")) {
+            if (confirm("¿Deseas activar el ingreso rápido con Huella Dactilar?")) {
               const ok = await registrarHuella(pinInput.value);
               if (ok) tieneHuellaHabilitada.value = true;
             }
@@ -456,80 +506,12 @@
           if (chartInstance) chartInstance.destroy();
         };
 
-        // Método para loguearse con Huella
         const loginConHuella = async () => {
           vibrate(20);
           const pinRecuperado = await autenticarConHuella();
           if (pinRecuperado) {
             activePin.value = pinRecuperado;
             await fetchData(pinRecuperado);
-          }
-        };
-
-        // Biometría
-        // Verificar si el dispositivo Android soporta biometría/pantalla de bloqueo
-        const soportaBiometria = async () => {
-          return window.PublicKeyCredential && 
-                await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-        };
-
-        // Registrar/Enroalar la Huella Dactilar
-        const registrarHuella = async (pin) => {
-          try {
-            const challenge = new Uint8Array(32);
-            window.crypto.getRandomValues(challenge);
-
-            const publicKey = {
-              challenge: challenge,
-              rp: { name: "BankBalance" },
-              user: {
-                id: Uint8Array.from("pin_bank_balance", c => c.charCodeAt(0)),
-                name: "pin@bankbalance",
-                displayName: "Pin BankBalance"
-              },
-              pubKeyCredParams: [{ alg: -7, type: "public-key" }],
-              authenticatorSelection: {
-                authenticatorAttachment: "platform", // Fuerza el uso del sensor local (huella/rostro de Android)
-                userVerification: "required"
-              },
-              timeout: 60000
-            };
-
-            const credential = await navigator.credentials.create({ publicKey });
-            if (credential) {
-              // Guardamos el PIN encriptado/asociado al almacenamiento local
-              localStorage.setItem('bankbalance_bio_pin', btoa(pin));
-              localStorage.setItem('bankbalance_bio_enabled', 'true');
-              vibrate(50); // Confirmación háptica
-              return true;
-            }
-          } catch (e) {
-            console.warn("Cancelado o no soportado:", e);
-            return false;
-          }
-        };
-
-        // Autenticar con Huella Dactilar para recuperar el PIN
-        const autenticarConHuella = async () => {
-          try {
-            const challenge = new Uint8Array(32);
-            window.crypto.getRandomValues(challenge);
-
-            const publicKey = {
-              challenge: challenge,
-              userVerification: "required",
-              timeout: 60000
-            };
-
-            // Dispara el sensor nativo de Android
-            const assertion = await navigator.credentials.get({ publicKey });
-            if (assertion) {
-              const storedEncryptedPin = localStorage.getItem('bankbalance_bio_pin');
-              return storedEncryptedPin ? atob(storedEncryptedPin) : null;
-            }
-          } catch (e) {
-            console.warn("Autenticación biométrica fallida o cancelada", e);
-            return null;
           }
         };
 
@@ -542,7 +524,6 @@
           return d.toLocaleString('es-CL', { dateStyle: 'short', timeStyle: 'short' });
         };
 
-        // MONTO COMPROMETIDO (Toma directamente el monto_a_pagar provisto en el JSON)
         const montoComprometidoActual = computed(() => {
           if (data.value.balances?.monto_a_pagar !== undefined) {
             return Math.abs(data.value.balances.monto_a_pagar);
@@ -555,7 +536,6 @@
           return hoy.toLocaleString('es-CL', { month: 'long', year: 'numeric' });
         });
 
-        // PROYECTOR MENSUAL
         const proyeccionMes = computed(() => {
           const hoy = new Date();
           const year = hoy.getFullYear();
@@ -563,7 +543,6 @@
           const diaHoyNum = hoy.getDate();
 
           const totalDiasMes = new Date(year, month, 0).getDate();
-
           const primerDiaObj = new Date(year, month - 1, 1);
           const diaSemanaPrimerDia = primerDiaObj.getDay(); 
           const diasOffset = (diaSemanaPrimerDia === 0) ? 6 : diaSemanaPrimerDia - 1;
@@ -622,7 +601,6 @@
           };
         });
 
-        // GRÁFICO HISTÓRICO
         const datosGrafico = computed(() => {
           const movs = data.value.movimientos || [];
           const refDate = new Date(fechaFiltro.value || new Date());
@@ -719,7 +697,6 @@
           }
         });
 
-        // COMPUTADOS DE FILTRADO HISTÓRICO
         const mesAnioSeleccionado = computed(() => fechaFiltro.value ? fechaFiltro.value.substring(0, 7) : '');
 
         const mesAnioTextoFiltro = computed(() => {
@@ -770,10 +747,12 @@
           return list;
         });
 
+        // IMPORTANTE: Exportar correctamente las variables biométricas al template de Vue
         return {
           authenticated, pinInput, errorMessage, loading, data, filtroFecha, busqueda, fechaFiltro,
           modoGrafico, mesAnioTextoActual, mesAnioTextoFiltro, gastosDiaSeleccionado, gastosMesSeleccionado, 
           totalTransaccionesMes, movimientosFiltrados, GASTO_CONFIG, montoComprometidoActual, proyeccionMes,
+          tieneHuellaHabilitada, biometriaDisponible, loginConHuella,
           vibrate, login, logout, formatCLP, formatNumber, formatTimestamp
         };
       }
