@@ -353,7 +353,19 @@
         onMounted(async () => {
           // 1. Registrar Service Worker PWA
           if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').catch(() => {});
+            navigator.serviceWorker.register('./sw.js').then((reg) => {
+              reg.addEventListener('updatefound', () => {
+                const newWorker = reg.installing;
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // Detectó nueva versión instalada
+                    if (confirm('¡Nueva versión disponible con ingreso por huella! ¿Deseas actualizar ahora?')) {
+                      window.location.reload();
+                    }
+                  }
+                });
+              });
+            });
           }
 
           // 2. Cargar datos del caché local inmediatamente (soporte offline)
