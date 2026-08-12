@@ -316,6 +316,10 @@
       FIN_SEMANA: 100000
     };
 
+    // Helpers de conversión de Buffer a Base64
+    const bufferToBase64 = (buffer) => btoa(String.fromCharCode(...new Uint8Array(buffer)));
+    const base64ToBuffer = (base64) => Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+
     createApp({
       setup() {
         const authenticated = ref(false);
@@ -333,33 +337,40 @@
         const modoGrafico = ref('dia');
         let chartInstance = null;
 
-        // Comprobación de Biometría
-        const soportaBiometria = async () => {
-          return !!(window.PublicKeyCredential && 
-            await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable());
-        };
+        // Obtener el ID de Relying Party dinámicamente según el dominio actual
+        const getRpId = () => window.location.hostname;
 
-        // ArrayBuffer a Base64 helper
-        const bufferToBase64 = (buffer) => btoa(String.fromCharCode(...new Uint8Array(buffer)));
-        // Base64 a Uint8Array helper
-        const base64ToBuffer = (base64) => Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+        // Comprobación de disponibilidad de biometría en el dispositivo
+        const soportaBiometria = async () => {
+          try {
+            return !!(window.PublicKeyCredential && 
+              await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable());
+          } catch (e) {
+            return false;
+          }
+        };
 
         const registrarHuella = async (pin) => {
           try {
             const challenge = new Uint8Array(32);
             window.crypto.getRandomValues(challenge);
 
+            const currentDomain = getRpId();
+
             const publicKey = {
               challenge: challenge,
-              rp: { name: "BankBalance" },
+              rp: { 
+                name: "BankBalance",
+                id: currentDomain.length > 0 ? currentDomain : undefined
+              },
               user: {
-                id: Uint8Array.from("user_bank_balance", c => c.charCodeAt(0)),
+                id: Uint8Array.from("user_bank_balance_id", c => c.charCodeAt(0)),
                 name: "seba@bankbalance",
                 displayName: "Seba BankBalance"
               },
               pubKeyCredParams: [
-                { alg: -7, type: "public-key" },  // ES256
-                { alg: -257, type: "public-key" } // RS256
+                { alg: -7, type: "public-key" },   // ES256
+                { alg: -257, type: "public-key" }  // RS256
               ],
               authenticatorSelection: {
                 authenticatorAttachment: "platform",
@@ -371,19 +382,15 @@
             const credential = await navigator.credentials.create({ publicKey });
             
             if (credential) {
-              // Guardamos tanto el PIN como el ID de la credencial generada
               const credentialIdBase64 = bufferToBase64(credential.rawId);
-              
               localStorage.setItem('bankbalance_bio_pin', btoa(pin));
               localStorage.setItem('bankbalance_bio_cred_id', credentialIdBase64);
               localStorage.setItem('bankbalance_bio_enabled', 'true');
-              
               vibrate(50);
               return true;
             }
           } catch (e) {
             console.error("Error al registrar la huella:", e);
-            alert("No se pudo completar el registro de la huella: " + e.message);
             return false;
           }
         };
@@ -393,7 +400,6 @@
           const storedCredId = localStorage.getItem('bankbalance_bio_cred_id');
 
           if (!storedEncryptedPin || !storedCredId) {
-            alert("No hay una huella registrada correctamente en este dispositivo.");
             return null;
           }
 
@@ -402,11 +408,13 @@
               const challenge = new Uint8Array(32);
               window.crypto.getRandomValues(challenge);
 
+              const currentDomain = getRpId();
+
               const publicKeyOptions = {
                 challenge: challenge,
+                rpId: currentDomain.length > 0 ? currentDomain : undefined,
                 userVerification: "preferred",
                 timeout: 60000,
-                // PASO CLAVE: Le indicamos explícitamente a Android qué credencial buscar
                 allowCredentials: [{
                   id: base64ToBuffer(storedCredId),
                   type: 'public-key'
@@ -419,8 +427,7 @@
                 return atob(storedEncryptedPin);
               }
             } catch (e) {
-              console.warn("Detalle del error en huella:", e);
-              alert("No se pudo verificar la huella o se canceló el lector. Ingresa tu PIN.");
+              console.warn("Autenticación por huella omitida o cancelada:", e.name || e);
               return null;
             }
           }
@@ -428,62 +435,28 @@
           return atob(storedEncryptedPin);
         };
 
-        const loginConHuella = async () => {
-          vibrate(20);
-          loading.value = true;
-          errorMessage.value = '';
-
-          try {
-            const pinRecuperado = await autenticarConHuella();
-            if (pinRecuperado) {
-              activePin.value = pinRecuperado;
-              await fetchData(pinRecuperado);
-            }
-          } catch (err) {
-            errorMessage.value = 'Error al procesar la huella.';
-          } finally {
-            loading.value = false;
-          }
-        };
-
         onMounted(async () => {
-          // 1. Service Worker PWA
+          // Service Worker
           if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').then((reg) => {
-              reg.addEventListener('updatefound', () => {
-                const newWorker = reg.installing;
-                newWorker.addEventListener('statechange', () => {
-                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    if (confirm('¡Nueva versión disponible! ¿Deseas actualizar ahora?')) {
-                      window.location.reload();
-                    }
-                  }
-                });
-              });
-            }).catch(() => {});
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
           }
 
-          // 2. Cargar caché local de datos
+          // Cargar datos locales
           const localCachedData = localStorage.getItem('bankbalance_last_data');
           if (localCachedData) {
             data.value = JSON.parse(localCachedData);
           }
 
-          // 3. Restaurar sesión por PIN si existe en sessionStorage
+          // Restaurar sesión activa
           const storedPin = sessionStorage.getItem('app_pin');
           if (storedPin) {
             activePin.value = storedPin;
             await fetchData(storedPin);
           }
 
-          // 4. Evaluar biometría
+          // Validar biometría disponible
           biometriaDisponible.value = await soportaBiometria();
           tieneHuellaHabilitada.value = localStorage.getItem('bankbalance_bio_enabled') === 'true';
-
-          // Solicitar huella al abrir la app si está habilitada y no autenticado
-          if (biometriaDisponible.value && tieneHuellaHabilitada.value && !authenticated.value) {
-            await loginConHuella();
-          }
         });
 
         const fetchData = async (pin) => {
@@ -546,6 +519,17 @@
           activePin.value = '';
           data.value = {};
           if (chartInstance) chartInstance.destroy();
+        };
+
+        const loginConHuella = async () => {
+          vibrate(20);
+          const pinRecuperado = await autenticarConHuella();
+          if (pinRecuperado) {
+            activePin.value = pinRecuperado;
+            await fetchData(pinRecuperado);
+          } else {
+            errorMessage.value = 'Huella no reconocida o acción cancelada.';
+          }
         };
 
         // Formateadores
@@ -780,7 +764,6 @@
           return list;
         });
 
-        // IMPORTANTE: Exportar correctamente las variables biométricas al template de Vue
         return {
           authenticated, pinInput, errorMessage, loading, data, filtroFecha, busqueda, fechaFiltro,
           modoGrafico, mesAnioTextoActual, mesAnioTextoFiltro, gastosDiaSeleccionado, gastosMesSeleccionado, 
