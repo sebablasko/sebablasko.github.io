@@ -374,21 +374,23 @@
         };
 
         const autenticarConHuella = async () => {
-          try {
-            // Se recupera directamente la credencial guardada localmente tras el prompt
-            const storedEncryptedPin = localStorage.getItem('bankbalance_bio_pin');
-            if (!storedEncryptedPin) return null;
+          const storedEncryptedPin = localStorage.getItem('bankbalance_bio_pin');
+          if (!storedEncryptedPin) {
+            alert("No hay ningún PIN registrado con huella en este dispositivo.");
+            return null;
+          }
 
-            // Verificación por la API nativa de Android
-            if (window.PublicKeyCredential) {
+          // Verificación por WebAuthn API
+          if (window.PublicKeyCredential) {
+            try {
               const challenge = new Uint8Array(32);
               window.crypto.getRandomValues(challenge);
 
-              // Solicitamos la verificación del usuario mediante el autenticador de plataforma
+              // Invocación nativa al lector biométrico
               const credential = await navigator.credentials.get({
                 publicKey: {
                   challenge: challenge,
-                  userVerification: "required",
+                  userVerification: "preferred", // 'preferred' es más flexible que 'required' en WebView/Android
                   timeout: 60000
                 }
               });
@@ -396,11 +398,35 @@
               if (credential) {
                 return atob(storedEncryptedPin);
               }
+            } catch (e) {
+              console.warn("Error en autenticación biométrica:", e);
+              
+              // Si la API falla o el usuario cancela, hacemos fallback manual
+              // Si prefieres que al fallar el sensor pida ingresar el PIN, el return null es correcto.
+              alert("No se pudo verificar la huella o se canceló el lector. Ingresa tu PIN manualmente.");
+              return null;
             }
-            return atob(storedEncryptedPin);
-          } catch (e) {
-            console.warn("Autenticación biométrica no completada:", e);
-            return null;
+          }
+
+          // Fallback para entornos donde no está disponible PublicKeyCredential
+          return atob(storedEncryptedPin);
+        };
+
+        const loginConHuella = async () => {
+          vibrate(20);
+          loading.value = true;
+          errorMessage.value = '';
+
+          try {
+            const pinRecuperado = await autenticarConHuella();
+            if (pinRecuperado) {
+              activePin.value = pinRecuperado;
+              await fetchData(pinRecuperado);
+            }
+          } catch (err) {
+            errorMessage.value = 'Error al procesar la huella.';
+          } finally {
+            loading.value = false;
           }
         };
 
@@ -504,15 +530,6 @@
           activePin.value = '';
           data.value = {};
           if (chartInstance) chartInstance.destroy();
-        };
-
-        const loginConHuella = async () => {
-          vibrate(20);
-          const pinRecuperado = await autenticarConHuella();
-          if (pinRecuperado) {
-            activePin.value = pinRecuperado;
-            await fetchData(pinRecuperado);
-          }
         };
 
         // Formateadores
