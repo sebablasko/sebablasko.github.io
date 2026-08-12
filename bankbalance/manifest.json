@@ -1,0 +1,25 @@
+{
+    "name": "Seba's Balance",
+    "short_name": "BankBalance",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#020617",
+    "theme_color": "#0f172a",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%2310b981'><rect width='512' height='512' rx='112' fill='%23020617'/><path d='M160 368h48V256h-48v112zm80 0h48V144h-48v224zm80 0h48V208h-48v160z' fill='%2310b981'/><path d='M120 192l100-80 80 60 112-90' stroke='%2338bdf8' stroke-width='32' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Ver Movimientos",
+            "short_name": "Movimientos",
+            "description": "Ir directo a los movimientos",
+            "url": "./index.html?vista=movimientos"
+        }
+    ]
+}

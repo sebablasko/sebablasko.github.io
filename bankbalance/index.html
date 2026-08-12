@@ -3,7 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scotia Tracker — Acceso Seguro</title>
+  <title>Seba's BankBalance — Acceso Seguro</title>
+  <!-- Enlace al Manifest PWA -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <!-- Color de la barra de estado de Android -->
+  <meta name="theme-color" content="#0f172a">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <!-- Chart.js para el gráfico de variación de gastos -->
@@ -28,7 +35,7 @@
       <div class="w-16 h-16 bg-slate-900 rounded-2xl border border-slate-800 flex items-center justify-center text-2xl mb-4 shadow-lg">
         🔒
       </div>
-      <h1 class="text-xl font-bold text-white mb-1">Scotia Tracker</h1>
+      <h1 class="text-xl font-bold text-white mb-1">Seba's BankBalance</h1>
       <p class="text-xs text-slate-400 mb-6">Enter your PIN code to access information</p>
 
       <form @submit.prevent="login" class="w-full max-w-xs space-y-4">
@@ -61,7 +68,7 @@
         <div class="flex justify-between items-center mb-3">
           <div class="flex items-center gap-2">
             <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-            <span class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Scotia Consolidator</span>
+            <span class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Seba's BankBalance</span>
           </div>
           <button @click="logout" class="text-[10px] text-slate-400 hover:text-red-400 bg-slate-800 px-2 py-1 rounded-md font-mono transition">
             🔒 Salir
@@ -332,6 +339,18 @@
         let chartInstance = null;
 
         onMounted(async () => {
+          // 1. Registrar Service Worker PWA
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
+          }
+
+          // 2. Cargar datos del caché local inmediatamente (soporte offline)
+          const localCachedData = localStorage.getItem('bankbalance_last_data');
+          if (localCachedData) {
+            data.value = JSON.parse(localCachedData);
+          }
+
+          // 3. Restaurar PIN y consultar
           const storedPin = sessionStorage.getItem('scotia_pin');
           if (storedPin) {
             activePin.value = storedPin;
@@ -354,8 +373,9 @@
 
             if (result.success) {
               authenticated.value = true;
+              localStorage.setItem('bankbalance_last_data', JSON.stringify(result.data));
               data.value = result.data || {};
-              sessionStorage.setItem('scotia_pin', pin);
+              sessionStorage.setItem('app_pin', pin);
 
               if (data.value.movimientos && data.value.movimientos.length > 0) {
                 fechaFiltro.value = data.value.movimientos[0].fecha;
@@ -374,15 +394,22 @@
           }
         };
 
+        const vibrate = (ms = 15) => {
+          if ('vibrate' in navigator) {
+            navigator.vibrate(ms);
+          }
+        };
+
         const login = async () => {
           if (!pinInput.value) return;
+          vibrate();
           activePin.value = pinInput.value;
           await fetchData(pinInput.value);
           pinInput.value = '';
         };
 
         const logout = () => {
-          sessionStorage.removeItem('scotia_pin');
+          sessionStorage.removeItem('app_pin');
           authenticated.value = false;
           activePin.value = '';
           data.value = {};
@@ -571,6 +598,7 @@
         watch([modoGrafico, fechaFiltro, data], () => {
           if (authenticated.value) {
             nextTick(() => renderChart());
+            vibrate();
           }
         });
 
