@@ -4,26 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Seba's BankBalance — Acceso Seguro</title>
-  <!-- Enlace al Manifest PWA -->
   <link rel="manifest" href="./manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <!-- Color de la barra de estado de Android -->
   <meta name="theme-color" content="#0f172a">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-  <!-- Chart.js para el gráfico de variación de gastos -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    input[type="date"]::-webkit-calendar-picker-indicator {
-      filter: invert(1);
-      cursor: pointer;
-    }
   </style>
 </head>
 <body class="bg-slate-900 text-slate-100 antialiased sm:py-8">
@@ -58,7 +50,6 @@
             {{ loading ? 'Verificando...' : 'Ingresar' }}
           </button>
 
-          <!-- BOTÓN DE HUELLA DACTILAR -->
           <button 
             v-if="biometriaDisponible && tieneHuellaHabilitada"
             type="button" 
@@ -74,240 +65,300 @@
     <!-- APLICACIÓN PRINCIPAL -->
     <template v-else>
       <!-- HEADER -->
-      <header class="bg-slate-900/90 backdrop-blur-md sticky top-0 z-20 px-5 pt-4 pb-3 border-b border-slate-800/80">
-        <div class="flex justify-between items-center mb-3">
-          <div class="flex items-center gap-2">
-            <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-            <span class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Seba's BankBalance</span>
-          </div>
-          <button @click="logout" class="text-[10px] text-slate-400 hover:text-red-400 bg-slate-800 px-2 py-1 rounded-md font-mono transition">
-            🔒 Salir
-          </button>
+      <header class="bg-slate-900/90 backdrop-blur-md sticky top-0 z-20 px-5 py-3 border-b border-slate-800/80 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span class="text-xs font-semibold text-slate-300 tracking-wider uppercase">Seba's BankBalance</span>
         </div>
-
-        <!-- RESUMEN DE CUPO (FIJO - MES EN CURSO) -->
-        <div class="bg-gradient-to-br from-slate-900 to-slate-800 p-4 rounded-2xl border border-slate-700/60 shadow-lg space-y-3">
-          <div class="flex justify-between items-baseline">
-            <span class="text-xs font-medium text-slate-400">Cupo Utilizado ({{ data.balances?.porcentaje_uso || 0 }}%)</span>
-            <span class="text-lg font-bold text-red-400">{{ formatCLP(data.balances?.cupo_utilizado) }}</span>
-          </div>
-
-          <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-            <div class="bg-gradient-to-r from-red-500 to-rose-400 h-full rounded-full transition-all duration-500" 
-                 :style="{ width: (data.balances?.porcentaje_uso || 0) + '%' }"></div>
-          </div>
-
-          <!-- DETALLES ADICIONALES DE BALANCES -->
-          <div class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-800/80">
-            <div>
-              <span class="text-[9px] block text-slate-500 uppercase font-semibold">Cupo Disponible</span>
-              <span class="font-bold text-emerald-400">{{ formatCLP(data.balances?.cupo_disponible) }}</span>
-            </div>
-            <div class="text-right">
-              <span class="text-[9px] block text-slate-500 uppercase font-semibold">Monto a Pagar</span>
-              <span class="font-bold text-rose-300">{{ formatCLP(data.balances?.monto_a_pagar) }}</span>
-            </div>
-          </div>
-
-          <!-- FIDELIZACIÓN (SCOTIA PUNTOS) -->
-          <div class="flex justify-between items-center text-xs pt-2 border-t border-slate-800/80">
-            <div>
-              <span class="text-[9px] block text-slate-500 uppercase font-semibold">PUNTOS SCOTIA</span>
-              <span class="font-bold text-amber-400">★ {{ formatNumber(data.loyalty?.puntos_totales) }}</span>
-            </div>
-            <div v-if="data.loyalty?.puntos_por_vencer > 0" class="text-right">
-              <span class="text-[9px] block text-amber-500/90 uppercase font-semibold">Por Vencer ({{ data.loyalty?.fecha_vencimiento }})</span>
-              <span class="font-mono text-[11px] text-amber-300 font-semibold">{{ formatNumber(data.loyalty?.puntos_por_vencer) }} pts</span>
-            </div>
-          </div>
-        </div>
+        <button @click="logout" class="text-[10px] text-slate-400 hover:text-red-400 bg-slate-800 px-2 py-1 rounded-md font-mono transition">
+          🔒 Salir
+        </button>
       </header>
 
       <!-- CONTENIDO PRINCIPAL -->
-      <main class="p-4 flex-1 space-y-4 overflow-y-auto no-scrollbar pb-12">
-        
-        <!-- COMPONENTE: PROYECTOR DE GASTO MES ACTUAL -->
-        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80 shadow-sm space-y-3">
-          <div class="flex justify-between items-center">
-            <div>
-              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">
-                Presupuesto {{ mesAnioTextoActual }}
-              </h3>
-              <p class="text-[10px] text-slate-500">
-                Comprometido: <span class="font-semibold text-slate-300">{{ formatCLP(montoComprometidoActual) }}</span> 
-                / Presupuestado: <span class="font-semibold text-slate-400">{{ formatCLP(proyeccionMes.presupuestoTotal) }}</span>
-              </p>
-            </div>
-            <span class="text-xs font-mono font-bold" 
-                  :class="proyeccionMes.porcentajeConsumido > 100 ? 'text-rose-400' : 'text-emerald-400'">
-              {{ proyeccionMes.porcentajeConsumido }}%
-            </span>
-          </div>
+      <main class="p-4 flex-1 space-y-4 overflow-y-auto no-scrollbar pb-20">
 
-          <!-- CABECERA DE DÍAS DE LA SEMANA -->
-          <div class="grid grid-cols-7 gap-1.5 text-center">
-            <span v-for="d in ['L', 'M', 'X', 'J', 'V', 'S', 'D']" :key="d" class="text-[9px] font-bold font-mono text-slate-500 uppercase">
-              {{ d }}
-            </span>
-          </div>
-
-          <!-- GRILLA DEL MES ACTUAL -->
-          <div class="grid grid-cols-7 gap-1.5">
-            <div v-for="offset in proyeccionMes.diasOffset" :key="'offset-' + offset" class="h-7"></div>
-            <div 
-              v-for="dia in proyeccionMes.dias" 
-              :key="dia.numeroDia"
-              :title="`Día ${dia.numeroDia}${dia.esHoy ? ' (HOY)' : ''}: Cupo ${formatCLP(dia.cupoDia)}`"
-              class="h-7 rounded-md transition-all duration-300 flex flex-col justify-end overflow-hidden relative group border"
-              :class="[
-                dia.esHoy ? 'ring-2 ring-sky-400 ring-offset-1 ring-offset-slate-950 z-10' : '',
-                dia.cubiertoCompletamente ? (dia.esFuturo ? 'bg-rose-500 border-rose-400/50 shadow-sm shadow-rose-900/40' : 'bg-emerald-500 border-emerald-400/50 shadow-sm shadow-emerald-900/40') : 
-                dia.esParcial ? (dia.esFuturo ? 'bg-slate-800/80 border-rose-400/80' : 'bg-slate-800/80 border-emerald-400/80') : 
-                'bg-slate-800/40 border-slate-800/80'
-              ]">
-              
-              <span class="absolute top-0.5 left-1 text-[8px] font-mono leading-none font-bold"
-                    :class="dia.cubiertoCompletamente ? 'text-slate-950/80' : 'text-slate-400'">
-                {{ dia.numeroDia }}
+        <!-- ================= PESTAÑA 1: TARJETA DE CRÉDITO ================= -->
+        <div v-if="activeTab === 'tc'" class="space-y-4">
+          
+          <!-- SALUD FINANCIERA TC: PRESUPUESTO OBJETIVO Y RITMO DE GASTO (BURN RATE) -->
+          <div class="bg-gradient-to-br from-slate-900 to-slate-800 p-4 rounded-2xl border border-slate-700/60 shadow-lg space-y-3">
+            
+            <!-- ENCABEZADO DE PRESUPUESTO -->
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Presupuesto TC {{ mesAnioTextoActual }}</span>
+                <span class="text-xs text-slate-500">Meta: <strong class="text-slate-300">{{ formatCLP(saludFinancieraTC.presupuestoTotal) }}</strong></span>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase" :class="saludFinancieraTC.badgeClass">
+                {{ saludFinancieraTC.estadoTexto }}
               </span>
+            </div>
 
-              <span v-if="dia.esHoy" class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping"></span>
-              <span v-if="dia.esHoy" class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+            <!-- MONTO COMPROMETIDO Y PORCENTAJE -->
+            <div class="flex justify-between items-baseline pt-1">
+              <span class="text-xl font-bold" :class="saludFinancieraTC.porcentajeGasto > 100 ? 'text-rose-400' : 'text-emerald-400'">
+                {{ formatCLP(montoComprometidoActual) }}
+              </span>
+              <span class="text-xs font-mono font-bold" :class="saludFinancieraTC.porcentajeGasto > 100 ? 'text-rose-400' : 'text-slate-300'">
+                {{ saludFinancieraTC.porcentajeGasto }}% de la meta
+              </span>
+            </div>
 
+            <!-- BARRA DE PROGRESO DE GASTO ACUMULADO -->
+            <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
+              <div class="h-full rounded-full transition-all duration-500" 
+                   :class="saludFinancieraTC.barColor"
+                   :style="{ width: Math.min(saludFinancieraTC.porcentajeGasto, 100) + '%' }"></div>
+            </div>
+
+            <!-- SECCIÓN BURN RATE: COMPARATIVA TIEMPO VS. GASTO -->
+            <div class="pt-2 border-t border-slate-800/80 space-y-1.5 text-xs">
+              <div class="flex justify-between items-center text-[10px] font-mono">
+                <span class="text-slate-400">⏱️ Tiempo Transcurrido: <strong class="text-slate-200">{{ saludFinancieraTC.porcentajeTiempo }}%</strong> (Día {{ saludFinancieraTC.diaActual }}/{{ saludFinancieraTC.totalDias }})</span>
+                <span class="text-slate-400">📊 Consumo: <strong :class="saludFinancieraTC.porcentajeGasto > saludFinancieraTC.porcentajeTiempo ? 'text-amber-400' : 'text-emerald-400'">{{ saludFinancieraTC.porcentajeGasto }}%</strong></span>
+              </div>
+
+              <!-- LÍNEA INDICADORA DE RITMO IDEAL VS REAL -->
+              <div class="relative w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                <div class="bg-sky-500/40 h-full absolute left-0" :style="{ width: saludFinancieraTC.porcentajeTiempo + '%' }"></div>
+                <div class="h-full rounded-full transition-all duration-500" 
+                     :class="saludFinancieraTC.porcentajeGasto > saludFinancieraTC.porcentajeTiempo ? 'bg-amber-400' : 'bg-emerald-400'"
+                     :style="{ width: Math.min(saludFinancieraTC.porcentajeGasto, 100) + '%' }"></div>
+              </div>
+            </div>
+
+            <!-- DATOS SECUNDARIOS (CUPO DISPONIBLE Y PUNTOS SCOTIA CON EXPIRACIÓN) -->
+            <div class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-800/80">
+              <div>
+                <span class="text-[9px] block text-slate-500 uppercase font-semibold">Cupo Disponible TC</span>
+                <span class="font-bold text-slate-300 font-mono">{{ formatCLP(balancesTC.cupo_disponible) }}</span>
+              </div>
+              <div class="text-right">
+                <span class="text-[9px] block text-slate-500 uppercase font-semibold">PUNTOS SCOTIA</span>
+                <span class="font-bold text-amber-400">★ {{ formatNumber(loyaltyInfo.puntos) }}</span>
+                <span v-if="loyaltyInfo.fechaVencimiento" class="text-[9px] block text-slate-400 font-mono mt-0.5">
+                  Vencen: {{ loyaltyInfo.fechaVencimiento }} ({{ loyaltyInfo.diasFaltantesText }})
+                </span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- PROYECTOR DE GASTO MES EN CALENDARIO -->
+          <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80 shadow-sm space-y-3">
+            <div class="flex justify-between items-center">
+              <div>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Distribución Diaria {{ mesAnioTextoActual }}</h3>
+              </div>
+              <span class="text-xs font-mono font-bold" :class="saludFinancieraTC.porcentajeGasto > 100 ? 'text-rose-400' : 'text-emerald-400'">
+                {{ saludFinancieraTC.porcentajeGasto }}%
+              </span>
+            </div>
+
+            <div class="grid grid-cols-7 gap-1.5 text-center">
+              <span v-for="d in ['L', 'M', 'X', 'J', 'V', 'S', 'D']" :key="d" class="text-[9px] font-bold font-mono text-slate-500 uppercase">{{ d }}</span>
+            </div>
+
+            <div class="grid grid-cols-7 gap-1.5">
+              <div v-for="offset in proyeccionMes.diasOffset" :key="'offset-' + offset" class="h-7"></div>
               <div 
-                v-if="dia.esParcial" 
-                :class="dia.esFuturo ? 'bg-rose-500' : 'bg-emerald-500'"
-                class="w-full transition-all duration-300" 
-                :style="{ height: dia.porcentajeLlenado + '%' }">
-              </div>
-
-              <span v-if="dia.esFinDeSemana && !dia.esHoy && !dia.cubiertoCompletamente" class="absolute bottom-0.5 right-0.5 w-1 h-1 rounded-full bg-amber-400/70"></span>
-            </div>
-          </div>
-
-          <!-- LEYENDA DEL COMPONENTE -->
-          <div class="flex justify-between items-center text-[9px] text-slate-500 pt-1 border-t border-slate-800/60">
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400"></span> Hoy</span>
-              <span class="flex items-center gap-1"><span class="w-2 h-2 bg-emerald-500 rounded-sm"></span> Al día</span>
-              <span class="flex items-center gap-1"><span class="w-2 h-2 bg-rose-500 rounded-sm"></span> Adelantado</span>
-              <span class="flex items-center gap-1"><span class="w-2 h-2 bg-slate-800/60 border border-slate-700 rounded-sm"></span> Disp.</span>
-            </div>
-            <span class="font-mono text-slate-400">${{ formatNumber(GASTO_CONFIG.SEMANA) }}/día</span>
-          </div>
-        </div>
-
-        <div class="pt-2 border-t border-slate-800/80"></div>
-
-        <!-- FECHA CONSULTADA -->
-        <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800 flex items-center justify-between gap-3">
-          <div class="flex items-center gap-2">
-            <span class="text-base">📅</span>
-            <div>
-              <span class="text-[10px] font-semibold text-slate-400 block leading-tight">FECHA CONSULTADA</span>
-              <span class="text-xs font-mono text-emerald-400">{{ fechaFiltro }}</span>
-            </div>
-          </div>
-          <input 
-            type="date" 
-            v-model="fechaFiltro"
-            class="bg-slate-950 text-slate-200 border border-slate-800 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 font-mono transition">
-        </div>
-
-        <!-- SECCIÓN DE GRÁFICO -->
-        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80 shadow-sm space-y-3">
-          <div class="flex justify-between items-center">
-            <div>
-              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Variación de Gastos</h3>
-              <p class="text-[10px] text-slate-500">Últimos 6 {{ modoGrafico === 'dia' ? 'días' : 'meses' }} acumulados</p>
-            </div>
-            <div class="flex bg-slate-950 p-0.5 rounded-xl border border-slate-800 text-[10px] font-medium">
-              <button 
-                @click="modoGrafico = 'dia'" 
-                :class="modoGrafico === 'dia' ? 'bg-emerald-600 text-white font-bold shadow' : 'text-slate-400'" 
-                class="px-2.5 py-1 rounded-lg transition">
-                Día
-              </button>
-              <button 
-                @click="modoGrafico = 'mes'" 
-                :class="modoGrafico === 'mes' ? 'bg-emerald-600 text-white font-bold shadow' : 'text-slate-400'" 
-                class="px-2.5 py-1 rounded-lg transition">
-                Mes
-              </button>
-            </div>
-          </div>
-
-          <div class="h-36 w-full relative">
-            <canvas id="chartVariacion"></canvas>
-          </div>
-        </div>
-
-        <!-- TARJETAS DE GASTOS -->
-        <div class="grid grid-cols-2 gap-3">
-          <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 shadow-sm">
-            <span class="text-[11px] font-medium text-slate-400 block mb-1">Gastado en la Fecha</span>
-            <p class="text-lg font-bold text-white tracking-tight">{{ formatCLP(gastosDiaSeleccionado) }}</p>
-            <span class="text-[10px] text-slate-500 font-mono mt-0.5 block">{{ fechaFiltro }}</span>
-          </div>
-
-          <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 shadow-sm">
-            <span class="text-[11px] font-medium text-slate-400 block mb-1">Gastos del Mes</span>
-            <p class="text-lg font-bold text-white tracking-tight">{{ formatCLP(gastosMesSeleccionado) }}</p>
-            <span class="text-[10px] text-slate-500 block mt-0.5">{{ totalTransaccionesMes }} movs. en {{ mesAnioTextoFiltro }}</span>
-          </div>
-        </div>
-
-        <!-- BUSCADOR Y FILTROS -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Movimientos</h2>
-            <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-[11px] font-medium">
-              <button @click="filtroFecha = 'dia'" :class="filtroFecha === 'dia' ? 'bg-slate-800 text-white shadow' : 'text-slate-400'" class="px-2.5 py-1 rounded-lg transition">Día</button>
-              <button @click="filtroFecha = 'mes'" :class="filtroFecha === 'mes' ? 'bg-slate-800 text-white shadow' : 'text-slate-400'" class="px-2.5 py-1 rounded-lg transition">Mes</button>
-              <button @click="filtroFecha = 'todos'" :class="filtroFecha === 'todos' ? 'bg-slate-800 text-white shadow' : 'text-slate-400'" class="px-2.5 py-1 rounded-lg transition">Todos</button>
-            </div>
-          </div>
-          <input v-model="busqueda" type="text" placeholder="Buscar por comercio o ciudad..." 
-                 class="w-full bg-slate-900/80 border border-slate-800 text-slate-200 placeholder-slate-500 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-slate-700 transition">
-        </div>
-
-        <!-- LISTA DE MOVIMIENTOS -->
-        <div class="bg-slate-900/40 rounded-2xl border border-slate-800/80 divide-y divide-slate-800/60 overflow-hidden">
-          <div v-if="movimientosFiltrados.length === 0" class="p-6 text-center text-slate-500 text-xs">
-            No se encontraron movimientos para los filtros seleccionados.
-          </div>
-          <div v-for="(item, idx) in movimientosFiltrados" :key="idx" class="p-3.5 flex justify-between items-center hover:bg-slate-900/80 transition">
-            <div class="pr-3 min-w-0">
-              <p class="text-xs font-semibold text-slate-200 truncate">{{ item.descripcion }}</p>
-              <div class="flex items-center gap-1.5 mt-0.5">
-                <span class="text-[10px] text-slate-500 font-mono">{{ item.fecha }}</span>
-                <span v-if="item.ciudad" class="text-[10px] text-slate-600">• {{ item.ciudad }}</span>
+                v-for="dia in proyeccionMes.dias" 
+                :key="dia.numeroDia"
+                class="h-7 rounded-md transition-all duration-300 flex flex-col justify-end overflow-hidden relative group border"
+                :class="[
+                  dia.esHoy ? 'ring-2 ring-sky-400 ring-offset-1 ring-offset-slate-950 z-10' : '',
+                  dia.cubiertoCompletamente ? (dia.esFuturo ? 'bg-rose-500 border-rose-400/50 shadow-sm shadow-rose-900/40' : 'bg-emerald-500 border-emerald-400/50 shadow-sm shadow-emerald-900/40') : 
+                  dia.esParcial ? (dia.esFuturo ? 'bg-slate-800/80 border-rose-400/80' : 'bg-slate-800/80 border-emerald-400/80') : 
+                  'bg-slate-800/40 border-slate-800/80'
+                ]">
+                <span class="absolute top-0.5 left-1 text-[8px] font-mono leading-none font-bold" :class="dia.cubiertoCompletamente ? 'text-slate-950/80' : 'text-slate-400'">{{ dia.numeroDia }}</span>
+                <div v-if="dia.esParcial" :class="dia.esFuturo ? 'bg-rose-500' : 'bg-emerald-500'" class="w-full transition-all duration-300" :style="{ height: dia.porcentajeLlenado + '%' }"></div>
               </div>
             </div>
-            <div class="text-right flex-shrink-0">
-              <span :class="item.tipo === 'Abono' || item.monto > 0 ? 'text-emerald-400 font-bold' : 'text-slate-200 font-semibold'" class="text-xs">
-                {{ item.tipo === 'Abono' || item.monto > 0 ? '+' : '-' }}{{ formatCLP(Math.abs(item.monto)) }}
-              </span>
-              <span class="text-[9px] block font-bold uppercase tracking-wider mt-0.5" :class="item.tipo === 'Abono' || item.monto > 0 ? 'text-emerald-500/80' : 'text-slate-500'">
-                {{ item.tipo }}
-              </span>
+          </div>
+
+          <!-- MOVIMIENTOS TC CON TOGGLE DE FECHAS -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Movimientos TC</h2>
+              <div class="flex bg-slate-950 p-0.5 rounded-xl border border-slate-800 text-[10px]">
+                <button @click="filtroFechaTC = 'hoy'" :class="filtroFechaTC === 'hoy' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-400'" class="px-2 py-0.5 rounded-lg transition">Hoy</button>
+                <button @click="filtroFechaTC = 'mes'" :class="filtroFechaTC === 'mes' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-400'" class="px-2 py-0.5 rounded-lg transition">Mes</button>
+                <button @click="filtroFechaTC = 'todos'" :class="filtroFechaTC === 'todos' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-400'" class="px-2 py-0.5 rounded-lg transition">Todos</button>
+              </div>
+            </div>
+
+            <div class="bg-slate-900/40 rounded-2xl border border-slate-800 divide-y divide-slate-800/60 overflow-hidden">
+              <div v-if="movimientosTCFiltrados.length === 0" class="p-4 text-center text-slate-500 text-xs">Sin movimientos en este periodo.</div>
+              <div v-for="(item, idx) in movimientosTCFiltrados" :key="idx" class="p-3 flex justify-between items-center text-xs">
+                <div>
+                  <p class="font-semibold text-slate-200 truncate max-w-[200px]">{{ item.descripcion }}</p>
+                  <span class="text-[10px] text-slate-500 font-mono">{{ item.fecha }}</span>
+                </div>
+                <span class="font-semibold" :class="item.monto > 0 ? 'text-emerald-400' : 'text-slate-200'">{{ formatCLP(item.monto) }}</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= PESTAÑA 2: CUENTA CORRIENTE ================= -->
+        <div v-if="activeTab === 'cc'" class="space-y-4">
+          
+          <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 p-5 rounded-2xl border border-indigo-500/20 shadow-lg space-y-3">
+            <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest block">Cuenta Corriente</span>
+            
+            <div class="flex justify-between items-end">
+              <div>
+                <span class="text-xs text-slate-400 block">Saldo Disponible</span>
+                <span class="text-2xl font-bold text-emerald-400">{{ formatCLP(balancesCC.saldo_disponible) }}</span>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-700/50 space-y-1.5 text-xs text-slate-400">
+              <div class="flex justify-between">
+                <span>Saldo Total</span>
+                <span class="font-mono font-semibold text-slate-200">{{ formatCLP(balancesCC.saldo_total) }}</span>
+              </div>
+
+              <div class="flex justify-between items-center" :class="balancesCC.retenciones > 0 ? 'text-amber-400' : 'text-slate-500'">
+                <span class="flex items-center gap-1">
+                  <span>Monto Retenciones</span>
+                  <span v-if="balancesCC.retenciones > 0" class="text-[9px] bg-amber-500/10 border border-amber-500/20 px-1 rounded font-mono">Retenido</span>
+                </span>
+                <span class="font-mono font-semibold">{{ formatCLP(balancesCC.retenciones) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- MOVIMIENTOS CC -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Movimientos de Cuenta</h2>
+              <div class="flex bg-slate-950 p-0.5 rounded-xl border border-slate-800 text-[10px]">
+                <button @click="filtroFechaCC = 'hoy'" :class="filtroFechaCC === 'hoy' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400'" class="px-2 py-0.5 rounded-lg transition">Hoy</button>
+                <button @click="filtroFechaCC = 'mes'" :class="filtroFechaCC === 'mes' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400'" class="px-2 py-0.5 rounded-lg transition">Mes</button>
+                <button @click="filtroFechaCC = 'todos'" :class="filtroFechaCC === 'todos' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400'" class="px-2 py-0.5 rounded-lg transition">Todos</button>
+              </div>
+            </div>
+
+            <div class="bg-slate-900/40 rounded-2xl border border-slate-800 divide-y divide-slate-800/60 overflow-hidden">
+              <div v-if="movimientosCCFiltrados.length === 0" class="p-4 text-center text-slate-500 text-xs">Sin movimientos en este periodo.</div>
+              <div v-for="(item, idx) in movimientosCCFiltrados" :key="idx" class="p-3.5 flex justify-between items-center text-xs hover:bg-slate-900/60">
+                <div>
+                  <p class="font-semibold text-slate-200 truncate max-w-[200px]">{{ item.descripcion }}</p>
+                  <span class="text-[10px] text-slate-500 font-mono">{{ item.fecha }}</span>
+                </div>
+                <div class="text-right">
+                  <span class="font-bold" :class="item.monto > 0 || item.tipo === 'Abono' ? 'text-emerald-400' : 'text-slate-200'">
+                    {{ item.monto > 0 ? '+' : '' }}{{ formatCLP(item.monto) }}
+                  </span>
+                  <span class="text-[9px] block uppercase font-bold text-slate-500">{{ item.tipo }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= PESTAÑA 3: INVERSIONES ================= -->
+        <div v-if="activeTab === 'inversiones'" class="space-y-4">
+          <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950 p-5 rounded-2xl border border-emerald-500/20 shadow-lg space-y-2">
+            <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block">Portafolio Total</span>
+            <span class="text-2xl font-bold text-white block">{{ formatCLP(inversionesData.total) }}</span>
+            <span class="text-xs text-slate-400 block">{{ inversionesData.por_fondo?.length || 0 }} fondos activos</span>
+          </div>
+
+          <div class="space-y-2">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Distribución por Fondo</h2>
+            <div class="space-y-2">
+              <div v-for="(fondo, idx) in inversionesData.por_fondo" :key="idx" class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 space-y-2">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h3 class="text-xs font-semibold text-slate-200">{{ fondo.fund }}</h3>
+                    <span class="text-[10px] text-emerald-400 font-mono font-bold">{{ fondo.percentage }}% del portafolio</span>
+                  </div>
+                  <span class="text-sm font-bold text-white">{{ formatCLP(fondo.balance) }}</span>
+                </div>
+                <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                  <div class="bg-emerald-500 h-full rounded-full" :style="{ width: fondo.percentage + '%' }"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- METADATA EN EL FOOTER -->
+        <!-- ================= PESTAÑA 4: CONSOLIDADO ================= -->
+        <div v-if="activeTab === 'consolidado'" class="space-y-4">
+          <div class="space-y-2">
+            <input v-model="busqueda" type="text" placeholder="Buscar por descripción..." 
+                   class="w-full bg-slate-900 border border-slate-800 text-slate-200 placeholder-slate-500 text-xs rounded-xl px-3 py-2.5 focus:outline-none">
+
+            <div class="flex justify-between items-center pt-1">
+              <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Historial Global</h2>
+              <div class="flex bg-slate-950 p-0.5 rounded-xl border border-slate-800 text-[10px]">
+                <button @click="filtroFechaGlobal = 'hoy'" :class="filtroFechaGlobal === 'hoy' ? 'bg-sky-600 text-white font-bold' : 'text-slate-400'" class="px-2 py-0.5 rounded-lg transition">Hoy</button>
+                <button @click="filtroFechaGlobal = 'mes'" :class="filtroFechaGlobal === 'mes' ? 'bg-sky-600 text-white font-bold' : 'text-slate-400'" class="px-2 py-0.5 rounded-lg transition">Mes</button>
+                <button @click="filtroFechaGlobal = 'todos'" :class="filtroFechaGlobal === 'todos' ? 'bg-sky-600 text-white font-bold' : 'text-slate-400'" class="px-2 py-0.5 rounded-lg transition">Todos</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/40 rounded-2xl border border-slate-800 divide-y divide-slate-800/60 overflow-hidden">
+            <div v-if="todosLosMovimientosFiltrados.length === 0" class="p-4 text-center text-slate-500 text-xs">No hay movimientos en este periodo.</div>
+            <div v-for="(item, idx) in todosLosMovimientosFiltrados" :key="idx" class="p-3.5 flex justify-between items-center text-xs">
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="px-1.5 py-0.5 rounded text-[8px] font-bold font-mono uppercase" 
+                        :class="item.origen === 'TC' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'">
+                    {{ item.origen }}
+                  </span>
+                  <p class="font-semibold text-slate-200 truncate max-w-[160px]">{{ item.descripcion }}</p>
+                </div>
+                <span class="text-[10px] text-slate-500 font-mono block mt-0.5">{{ item.fecha }}</span>
+              </div>
+              <span class="font-bold" :class="item.monto > 0 ? 'text-emerald-400' : 'text-slate-200'">{{ formatCLP(item.monto) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- METADATA EN FOOTER -->
         <div v-if="data.metadata?.timestamp" class="text-center pt-2">
-          <span class="text-[9px] text-slate-600 font-mono">
-            Última Sincronización: {{ formatTimestamp(data.metadata.timestamp) }}
-          </span>
+          <span class="text-[9px] text-slate-600 font-mono">Última Sincronización: {{ formatTimestamp(data.metadata.timestamp) }}</span>
         </div>
+
       </main>
+
+      <!-- BARRA DE NAVEGACIÓN INFERIOR (TABS) -->
+      <nav class="bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 fixed bottom-0 left-0 right-0 max-w-md mx-auto z-30 flex justify-around items-center px-2 py-2 text-[10px]">
+        <button @click="activeTab = 'tc'" :class="activeTab === 'tc' ? 'text-emerald-400 font-bold' : 'text-slate-500'" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition">
+          <span class="text-base">💳</span>
+          <span>Tarjeta</span>
+        </button>
+
+        <button @click="activeTab = 'cc'" :class="activeTab === 'cc' ? 'text-indigo-400 font-bold' : 'text-slate-500'" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition">
+          <span class="text-base">🏦</span>
+          <span>Cuenta</span>
+        </button>
+
+        <button @click="activeTab = 'inversiones'" :class="activeTab === 'inversiones' ? 'text-emerald-400 font-bold' : 'text-slate-500'" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition">
+          <span class="text-base">📈</span>
+          <span>Inversión</span>
+        </button>
+
+        <button @click="activeTab = 'consolidado'" :class="activeTab === 'consolidado' ? 'text-sky-400 font-bold' : 'text-slate-500'" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition">
+          <span class="text-base">📊</span>
+          <span>Global</span>
+        </button>
+      </nav>
+
     </template>
 
   </div>
 
   <script>
-    const { createApp, ref, computed, watch, nextTick, onMounted } = Vue;
+    const { createApp, ref, computed, watch, onMounted } = Vue;
 
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwDbk6232lk5wgfhORW7hnjndydSOaO3qecF5byZW-SFnHUXCrB7QC7tXUX7B5VS8teYA/exec';
 
@@ -316,7 +367,6 @@
       FIN_SEMANA: 100000
     };
 
-    // Helpers de conversión de Buffer a Base64
     const bufferToBase64 = (buffer) => btoa(String.fromCharCode(...new Uint8Array(buffer)));
     const base64ToBuffer = (base64) => Uint8Array.from(atob(base64), c => c.charCodeAt(0));
 
@@ -328,19 +378,18 @@
         const errorMessage = ref('');
         const loading = ref(false);
         const data = ref({});
-        const filtroFecha = ref('dia');
         const busqueda = ref('');
-        const fechaFiltro = ref(new Date().toISOString().substring(0, 10));
         const tieneHuellaHabilitada = ref(false);
         const biometriaDisponible = ref(false);
         
-        const modoGrafico = ref('dia');
-        let chartInstance = null;
+        const activeTab = ref('tc');
 
-        // Obtener el ID de Relying Party dinámicamente según el dominio actual
+        const filtroFechaTC = ref('todos');
+        const filtroFechaCC = ref('todos');
+        const filtroFechaGlobal = ref('todos');
+
         const getRpId = () => window.location.hostname;
 
-        // Comprobación de disponibilidad de biometría en el dispositivo
         const soportaBiometria = async () => {
           try {
             return !!(window.PublicKeyCredential && 
@@ -354,43 +403,27 @@
           try {
             const challenge = new Uint8Array(32);
             window.crypto.getRandomValues(challenge);
-
             const currentDomain = getRpId();
 
             const publicKey = {
               challenge: challenge,
-              rp: { 
-                name: "BankBalance",
-                id: currentDomain.length > 0 ? currentDomain : undefined
-              },
-              user: {
-                id: Uint8Array.from("user_bank_balance_id", c => c.charCodeAt(0)),
-                name: "seba@bankbalance",
-                displayName: "Seba BankBalance"
-              },
-              pubKeyCredParams: [
-                { alg: -7, type: "public-key" },   // ES256
-                { alg: -257, type: "public-key" }  // RS256
-              ],
-              authenticatorSelection: {
-                authenticatorAttachment: "platform",
-                userVerification: "preferred"
-              },
+              rp: { name: "BankBalance", id: currentDomain.length > 0 ? currentDomain : undefined },
+              user: { id: Uint8Array.from("user_bank_balance_id", c => c.charCodeAt(0)), name: "seba@bankbalance", displayName: "Seba BankBalance" },
+              pubKeyCredParams: [{ alg: -7, type: "public-key" }, { alg: -257, type: "public-key" }],
+              authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "preferred" },
               timeout: 60000
             };
 
             const credential = await navigator.credentials.create({ publicKey });
-            
             if (credential) {
-              const credentialIdBase64 = bufferToBase64(credential.rawId);
               localStorage.setItem('bankbalance_bio_pin', btoa(pin));
-              localStorage.setItem('bankbalance_bio_cred_id', credentialIdBase64);
+              localStorage.setItem('bankbalance_bio_cred_id', bufferToBase64(credential.rawId));
               localStorage.setItem('bankbalance_bio_enabled', 'true');
               vibrate(50);
               return true;
             }
           } catch (e) {
-            console.error("Error al registrar la huella:", e);
+            console.error("Error al registrar huella:", e);
             return false;
           }
         };
@@ -398,63 +431,39 @@
         const autenticarConHuella = async () => {
           const storedEncryptedPin = localStorage.getItem('bankbalance_bio_pin');
           const storedCredId = localStorage.getItem('bankbalance_bio_cred_id');
-
-          if (!storedEncryptedPin || !storedCredId) {
-            return null;
-          }
+          if (!storedEncryptedPin || !storedCredId) return null;
 
           if (window.PublicKeyCredential) {
             try {
               const challenge = new Uint8Array(32);
               window.crypto.getRandomValues(challenge);
-
-              const currentDomain = getRpId();
-
               const publicKeyOptions = {
                 challenge: challenge,
-                rpId: currentDomain.length > 0 ? currentDomain : undefined,
+                rpId: getRpId() || undefined,
                 userVerification: "preferred",
                 timeout: 60000,
-                allowCredentials: [{
-                  id: base64ToBuffer(storedCredId),
-                  type: 'public-key'
-                }]
+                allowCredentials: [{ id: base64ToBuffer(storedCredId), type: 'public-key' }]
               };
-
               const credential = await navigator.credentials.get({ publicKey: publicKeyOptions });
-
-              if (credential) {
-                return atob(storedEncryptedPin);
-              }
+              if (credential) return atob(storedEncryptedPin);
             } catch (e) {
-              console.warn("Autenticación por huella omitida o cancelada:", e.name || e);
               return null;
             }
           }
-
           return atob(storedEncryptedPin);
         };
 
         onMounted(async () => {
-          // Service Worker
-          if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').catch(() => {});
-          }
-
-          // Cargar datos locales
+          if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
           const localCachedData = localStorage.getItem('bankbalance_last_data');
-          if (localCachedData) {
-            data.value = JSON.parse(localCachedData);
-          }
+          if (localCachedData) data.value = JSON.parse(localCachedData);
 
-          // Restaurar sesión activa
           const storedPin = sessionStorage.getItem('app_pin');
           if (storedPin) {
             activePin.value = storedPin;
             await fetchData(storedPin);
           }
 
-          // Validar biometría disponible
           biometriaDisponible.value = await soportaBiometria();
           tieneHuellaHabilitada.value = localStorage.getItem('bankbalance_bio_enabled') === 'true';
         });
@@ -462,27 +471,18 @@
         const fetchData = async (pin) => {
           loading.value = true;
           errorMessage.value = '';
-
           try {
             const response = await fetch(GOOGLE_SCRIPT_URL, {
               method: 'POST',
               headers: { 'Content-Type': 'text/plain;charset=utf-8' },
               body: JSON.stringify({ pin: pin, exec: 'READ' })
             });
-
             const result = await response.json();
-
             if (result.success) {
               authenticated.value = true;
               localStorage.setItem('bankbalance_last_data', JSON.stringify(result.data));
               data.value = result.data || {};
               sessionStorage.setItem('app_pin', pin);
-
-              if (data.value.movimientos && data.value.movimientos.length > 0) {
-                fechaFiltro.value = data.value.movimientos[0].fecha;
-              }
-
-              nextTick(() => renderChart());
             } else {
               errorMessage.value = result.error || 'Acceso no autorizado.';
               logout();
@@ -495,15 +495,12 @@
           }
         };
 
-        const vibrate = (ms = 15) => {
-          if ('vibrate' in navigator) navigator.vibrate(ms);
-        };
+        const vibrate = (ms = 15) => { if ('vibrate' in navigator) navigator.vibrate(ms); };
 
         const login = async () => {
           if (!pinInput.value) return;
           activePin.value = pinInput.value;
           await fetchData(pinInput.value);
-          
           if (authenticated.value && biometriaDisponible.value && !tieneHuellaHabilitada.value) {
             if (confirm("¿Deseas activar el ingreso rápido con Huella Dactilar?")) {
               const ok = await registrarHuella(pinInput.value);
@@ -518,7 +515,6 @@
           authenticated.value = false;
           activePin.value = '';
           data.value = {};
-          if (chartInstance) chartInstance.destroy();
         };
 
         const loginConHuella = async () => {
@@ -528,31 +524,101 @@
             activePin.value = pinRecuperado;
             await fetchData(pinRecuperado);
           } else {
-            errorMessage.value = 'Huella no reconocida o acción cancelada.';
+            errorMessage.value = 'Huella no reconocida o cancelado.';
           }
         };
 
-        // Formateadores
-        const formatCLP = (val) => val ? new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(val) : '$0';
+        const formatCLP = (val) => val !== undefined && val !== null ? new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(val) : '$0';
         const formatNumber = (val) => val ? new Intl.NumberFormat('es-CL').format(val) : '0';
-        const formatTimestamp = (isoStr) => {
-          if (!isoStr) return '';
-          const d = new Date(isoStr);
-          return d.toLocaleString('es-CL', { dateStyle: 'short', timeStyle: 'short' });
+        const formatTimestamp = (isoStr) => isoStr ? new Date(isoStr).toLocaleString('es-CL', { dateStyle: 'short', timeStyle: 'short' }) : '';
+
+        const aplicarFiltroFecha = (lista, modo) => {
+          if (!lista || lista.length === 0) return [];
+          if (modo === 'todos') return lista;
+
+          const hoyISO = new Date().toISOString().substring(0, 10);
+          const mesISO = hoyISO.substring(0, 7);
+
+          if (modo === 'hoy') return lista.filter(m => m.fecha === hoyISO);
+          if (modo === 'mes') return lista.filter(m => m.fecha && m.fecha.startsWith(mesISO));
+          return lista;
         };
 
-        const montoComprometidoActual = computed(() => {
-          if (data.value.balances?.monto_a_pagar !== undefined) {
-            return Math.abs(data.value.balances.monto_a_pagar);
+        // FUENTES DE DATOS COMPUTADAS
+        const balancesTC = computed(() => data.value.tarjeta_de_credito?.balances || {});
+        const movimientosTC = computed(() => data.value.tarjeta_de_credito?.movimientos || []);
+
+        // PUNTOS Y FECHA DE VENCIMIENTO
+        const loyaltyInfo = computed(() => {
+          const rawLoyalty = data.value.loyalty || data.value.tarjeta_de_credito?.loyalty || {};
+          const puntos = rawLoyalty.puntos_totales || rawLoyalty.puntos || 0;
+          const fechaVenc = rawLoyalty.fecha_vencimiento || rawLoyalty.vencimiento; 
+
+          let diasFaltantesText = '';
+          let fechaFormateada = '';
+
+          if (fechaVenc) {
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            const venc = new Date(fechaVenc);
+            
+            const diffTime = venc.getTime() - hoy.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            fechaFormateada = venc.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+            if (diffDays < 0) {
+              diasFaltantesText = 'Vencidos';
+            } else if (diffDays === 0) {
+              diasFaltantesText = 'Vencen hoy';
+            } else {
+              diasFaltantesText = `faltan ${diffDays} días`;
+            }
           }
-          return 0;
+
+          return {
+            puntos,
+            fechaVencimiento: fechaFormateada,
+            diasFaltantesText
+          };
         });
 
-        const mesAnioTextoActual = computed(() => {
-          const hoy = new Date();
-          return hoy.toLocaleString('es-CL', { month: 'long', year: 'numeric' });
+        const movimientosTCFiltrados = computed(() => aplicarFiltroFecha(movimientosTC.value, filtroFechaTC.value));
+
+        // CC Y OTROS
+        const balancesCC = computed(() => {
+          const rawCC = data.value.cuenta_corriente?.balances || {};
+          const saldoTotal = rawCC.saldo_total || 0;
+          const retenciones = rawCC.retenciones || 0;
+          return {
+            saldo_total: saldoTotal,
+            retenciones: retenciones,
+            saldo_disponible: saldoTotal - retenciones
+          };
+        });
+        
+        const movimientosCC = computed(() => data.value.cuenta_corriente?.movimientos || []);
+        const movimientosCCFiltrados = computed(() => aplicarFiltroFecha(movimientosCC.value, filtroFechaCC.value));
+        const inversionesData = computed(() => data.value.inversiones || { total: 0, por_fondo: [] });
+
+        const todosLosMovimientosFiltrados = computed(() => {
+          const tc = movimientosTC.value.map(m => ({ ...m, origen: 'TC' }));
+          const cc = movimientosCC.value.map(m => ({ ...m, origen: 'CC' }));
+          let unificados = [...tc, ...cc].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+          unificados = aplicarFiltroFecha(unificados, filtroFechaGlobal.value);
+
+          if (busqueda.value.trim() !== '') {
+            const q = busqueda.value.toLowerCase();
+            unificados = unificados.filter(m => m.descripcion.toLowerCase().includes(q));
+          }
+          return unificados;
         });
 
+        const montoComprometidoActual = computed(() => balancesTC.value.monto_a_pagar ? Math.abs(balancesTC.value.monto_a_pagar) : 0);
+        const mesAnioTextoActual = computed(() => new Date().toLocaleString('es-CL', { month: 'long', year: 'numeric' }));
+
+        // UNIFICACIÓN Y CÁLCULO DE ESTRUCTURA MENSUAL Y CALENDARIO
         const proyeccionMes = computed(() => {
           const hoy = new Date();
           const year = hoy.getFullYear();
@@ -560,29 +626,22 @@
           const diaHoyNum = hoy.getDate();
 
           const totalDiasMes = new Date(year, month, 0).getDate();
-          const primerDiaObj = new Date(year, month - 1, 1);
-          const diaSemanaPrimerDia = primerDiaObj.getDay(); 
+          const diaSemanaPrimerDia = new Date(year, month - 1, 1).getDay(); 
           const diasOffset = (diaSemanaPrimerDia === 0) ? 6 : diaSemanaPrimerDia - 1;
 
           let presupuestoTotal = 0;
           const estructuraDias = [];
 
           for (let d = 1; d <= totalDiasMes; d++) {
-            const fechaObj = new Date(year, month - 1, d);
-            const diaSemana = fechaObj.getDay();
-            const esFinDeSemana = (diaSemana === 0 || diaSemana === 6);
+            const esFinDeSemana = ([0, 6].includes(new Date(year, month - 1, d).getDay()));
             const cupoDia = esFinDeSemana ? GASTO_CONFIG.FIN_SEMANA : GASTO_CONFIG.SEMANA;
-            const esHoy = (d === diaHoyNum);
-            const esFuturo = (d > diaHoyNum);
-
             presupuestoTotal += cupoDia;
 
             estructuraDias.push({
               numeroDia: d,
-              esFinDeSemana,
               cupoDia,
-              esHoy,
-              esFuturo,
+              esHoy: (d === diaHoyNum),
+              esFuturo: (d > diaHoyNum),
               cubiertoCompletamente: false,
               esParcial: false,
               porcentajeLlenado: 0
@@ -590,10 +649,7 @@
           }
 
           let remanenteGasto = montoComprometidoActual.value;
-
-          for (let i = 0; i < estructuraDias.length; i++) {
-            const dia = estructuraDias[i];
-
+          for (let dia of estructuraDias) {
             if (remanenteGasto >= dia.cupoDia) {
               dia.cubiertoCompletamente = true;
               remanenteGasto -= dia.cupoDia;
@@ -606,169 +662,64 @@
             }
           }
 
-          const porcentajeConsumido = presupuestoTotal > 0 
-            ? Math.round((montoComprometidoActual.value / presupuestoTotal) * 100) 
-            : 0;
-
           return {
             dias: estructuraDias,
             diasOffset,
             presupuestoTotal,
-            porcentajeConsumido
+            totalDiasMes,
+            diaHoyNum
           };
         });
 
-        const datosGrafico = computed(() => {
-          const movs = data.value.movimientos || [];
-          const refDate = new Date(fechaFiltro.value || new Date());
-          const labels = [];
-          const values = [];
+        // INDICADOR DE SALUD FINANCIERA (USA PROYECCIONMES REUTILIZANDO CÁLCULOS)
+        const saludFinancieraTC = computed(() => {
+          const { presupuestoTotal, totalDiasMes, diaHoyNum } = proyeccionMes.value;
+          const gastado = montoComprometidoActual.value;
 
-          if (modoGrafico.value === 'dia') {
-            for (let i = 5; i >= 0; i--) {
-              const d = new Date(refDate);
-              d.setDate(d.getDate() - i);
-              const isoDay = d.toISOString().substring(0, 10);
-              
-              const totalDia = movs
-                .filter(m => m.fecha === isoDay && (m.tipo === 'Cargo' || m.monto < 0))
-                .reduce((acc, m) => acc + Math.abs(m.monto), 0);
+          const porcentajeGasto = presupuestoTotal > 0 ? Math.round((gastado / presupuestoTotal) * 100) : 0;
+          const porcentajeTiempo = Math.round((diaHoyNum / totalDiasMes) * 100);
 
-              labels.push(isoDay.substring(5));
-              values.push(totalDia);
-            }
-          } else {
-            for (let i = 5; i >= 0; i--) {
-              const d = new Date(refDate.getFullYear(), refDate.getMonth() - i, 1);
-              const year = d.getFullYear();
-              const month = String(d.getMonth() + 1).padStart(2, '0');
-              const isoMonth = `${year}-${month}`;
+          let estadoTexto = 'Ritmo Sostenible';
+          let badgeClass = 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400';
+          let barColor = 'bg-emerald-500';
 
-              const totalMes = movs
-                .filter(m => m.fecha.startsWith(isoMonth) && (m.tipo === 'Cargo' || m.monto < 0))
-                .reduce((acc, m) => acc + Math.abs(m.monto), 0);
-
-              const monthLabel = d.toLocaleString('es-CL', { month: 'short' }).replace('.', '');
-              labels.push(monthLabel.toUpperCase());
-              values.push(totalMes);
-            }
+          if (porcentajeGasto > 100) {
+            estadoTexto = 'Presupuesto Excedido';
+            badgeClass = 'bg-rose-500/10 border-rose-500/30 text-rose-400 animate-pulse';
+            barColor = 'bg-rose-500';
+          } else if (porcentajeGasto > porcentajeTiempo + 15) {
+            estadoTexto = 'Gastando Rápido';
+            badgeClass = 'bg-amber-500/10 border-amber-500/30 text-amber-400';
+            barColor = 'bg-amber-500';
+          } else if (porcentajeGasto >= 85) {
+            estadoTexto = 'Límite Cercano';
+            badgeClass = 'bg-amber-500/10 border-amber-500/30 text-amber-400';
+            barColor = 'bg-amber-500';
           }
 
-          return { labels, values };
+          return {
+            presupuestoTotal,
+            porcentajeGasto,
+            porcentajeTiempo,
+            diaActual: diaHoyNum,
+            totalDias: totalDiasMes,
+            estadoTexto,
+            badgeClass,
+            barColor
+          };
         });
 
-        const renderChart = () => {
-          const ctx = document.getElementById('chartVariacion');
-          if (!ctx) return;
-
-          if (chartInstance) chartInstance.destroy();
-
-          const { labels, values } = datosGrafico.value;
-
-          chartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-              labels: labels,
-              datasets: [{
-                label: 'Gastos ($)',
-                data: values,
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.35,
-                pointBackgroundColor: '#10b981',
-                pointRadius: 4,
-                pointHoverRadius: 6
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: { display: false },
-                tooltip: {
-                  callbacks: {
-                    label: (context) => formatCLP(context.raw)
-                  }
-                }
-              },
-              scales: {
-                x: {
-                  grid: { display: false },
-                  ticks: { color: '#64748b', font: { size: 10 } }
-                },
-                y: {
-                  display: false,
-                  beginAtZero: true
-                }
-              }
-            }
-          });
-        };
-
-        watch([modoGrafico, fechaFiltro, data], () => {
-          if (authenticated.value) {
-            nextTick(() => renderChart());
-            vibrate();
-          }
-        });
-
-        const mesAnioSeleccionado = computed(() => fechaFiltro.value ? fechaFiltro.value.substring(0, 7) : '');
-
-        const mesAnioTextoFiltro = computed(() => {
-          if (!fechaFiltro.value) return '';
-          const [year, month] = fechaFiltro.value.split('-');
-          const date = new Date(year, month - 1);
-          return date.toLocaleString('es-CL', { month: 'long', year: 'numeric' });
-        });
-
-        const gastosDiaSeleccionado = computed(() => {
-          const movs = data.value.movimientos || [];
-          return movs
-            .filter(m => m.fecha === fechaFiltro.value && (m.tipo === 'Cargo' || m.monto < 0))
-            .reduce((acc, m) => acc + Math.abs(m.monto), 0);
-        });
-
-        const gastosMesSeleccionado = computed(() => {
-          const movs = data.value.movimientos || [];
-          const prefijoMes = mesAnioSeleccionado.value;
-          return movs
-            .filter(m => m.fecha.startsWith(prefijoMes) && (m.tipo === 'Cargo' || m.monto < 0))
-            .reduce((acc, m) => acc + Math.abs(m.monto), 0);
-        });
-
-        const totalTransaccionesMes = computed(() => {
-          const movs = data.value.movimientos || [];
-          const prefijoMes = mesAnioSeleccionado.value;
-          return movs.filter(m => m.fecha.startsWith(prefijoMes)).length;
-        });
-
-        const movimientosFiltrados = computed(() => {
-          let list = data.value.movimientos || [];
-
-          if (filtroFecha.value === 'dia') {
-            list = list.filter(m => m.fecha === fechaFiltro.value);
-          } else if (filtroFecha.value === 'mes') {
-            const prefijoMes = mesAnioSeleccionado.value;
-            list = list.filter(m => m.fecha.startsWith(prefijoMes));
-          }
-
-          if (busqueda.value.trim() !== '') {
-            const q = busqueda.value.toLowerCase();
-            list = list.filter(m => 
-              m.descripcion.toLowerCase().includes(q) || 
-              (m.ciudad && m.ciudad.toLowerCase().includes(q))
-            );
-          }
-          return list;
+        watch([activeTab, filtroFechaTC, filtroFechaCC, filtroFechaGlobal], () => {
+          vibrate();
         });
 
         return {
-          authenticated, pinInput, errorMessage, loading, data, filtroFecha, busqueda, fechaFiltro,
-          modoGrafico, mesAnioTextoActual, mesAnioTextoFiltro, gastosDiaSeleccionado, gastosMesSeleccionado, 
-          totalTransaccionesMes, movimientosFiltrados, GASTO_CONFIG, montoComprometidoActual, proyeccionMes,
-          tieneHuellaHabilitada, biometriaDisponible, loginConHuella,
+          authenticated, pinInput, errorMessage, loading, data, busqueda,
+          mesAnioTextoActual, GASTO_CONFIG, montoComprometidoActual, proyeccionMes, saludFinancieraTC,
+          tieneHuellaHabilitada, biometriaDisponible, loginConHuella, activeTab,
+          filtroFechaTC, filtroFechaCC, filtroFechaGlobal,
+          balancesTC, movimientosTCFiltrados, loyaltyInfo, 
+          balancesCC, movimientosCCFiltrados, inversionesData, todosLosMovimientosFiltrados,
           vibrate, login, logout, formatCLP, formatNumber, formatTimestamp
         };
       }
