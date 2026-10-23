@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Zapatilla">
+<rect width="400" height="300" fill="#E9E0D5"/>
+<ellipse cx="200" cy="250" rx="150" ry="13" fill="#17242B" opacity=".12"/>
+<path d="M60 205 C60 180 80 170 110 165 L150 120 C165 105 190 105 205 120 L220 140 C260 145 330 160 345 195 C350 215 340 225 320 225 L80 225 C65 225 60 215 60 205 Z" fill="#7A5C3E"/>
+<path d="M60 208 L345 208 L345 224 C345 232 338 238 328 238 L78 238 C66 238 60 232 60 222 Z" fill="#17242B"/>
+<path d="M152 124 L214 152" stroke="#F4F6F8" stroke-width="8" stroke-linecap="round"/>
+<path d="M132 150 L192 176" stroke="#F4F6F8" stroke-width="8" stroke-linecap="round"/>
+<path d="M240 160 L300 175" stroke="#F4F6F8" stroke-width="8" stroke-linecap="round"/>
+</svg>

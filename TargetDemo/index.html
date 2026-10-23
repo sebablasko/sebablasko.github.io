@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sendero | Calzado para correr, trepar y caminar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script src="js/products.js"></script>
+<script src="js/params.js"></script>
+<script src="at.js"></script>
+</head>
+<body data-page="index">
+<div id="promo-bar" class="promo">Envío gratis en compras desde $80</div>
+<header class="top">
+  <a class="logo" href="index.html">Sendero</a>
+  <nav aria-label="Categorías">
+    <a href="category.html?cat=running">Running</a>
+    <a href="category.html?cat=trail">Trail</a>
+    <a href="category.html?cat=casual">Casual</a>
+  </nav>
+</header>
+<main>
+<section class="hero">
+  <div class="hero-copy">
+    <h1 id="hero-title">Corre más lejos con zapatillas que te siguen el ritmo</h1>
+    <p id="hero-sub">Running, trail y calzado diario. Envío gratis desde $80.</p>
+    <a id="hero-cta" class="btn" href="category.html?cat=running">Ver running</a>
+  </div>
+  <div id="hero-visual" class="hero-visual"><img src="img/sd-101.svg" alt="Zapatilla azul de running"></div>
+</section>
+<section class="block" aria-labelledby="h-top">
+  <h2 id="h-top">Lo más buscado</h2>
+  <div id="grid" class="grid"></div>
+</section>
+<section class="block" aria-labelledby="recs-title">
+  <h2 id="recs-title">Te puede interesar</h2>
+  <div id="recs-home" class="recs-slot"></div>
+</section>
+</main>
+<footer>
+  <button id="dbg-toggle" aria-expanded="false" aria-controls="dbg">Ver parámetros enviados a Target</button>
+  <pre id="dbg"></pre>
+</footer>
+<script src="js/app.js"></script>
+</body>
+</html>

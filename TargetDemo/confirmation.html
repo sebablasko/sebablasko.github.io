@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compra confirmada | Sendero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script src="js/products.js"></script>
+<script src="js/params.js"></script>
+<script src="at.js"></script>
+</head>
+<body data-page="confirmation">
+<div id="promo-bar" class="promo">Envío gratis en compras desde $80</div>
+<header class="top">
+  <a class="logo" href="index.html">Sendero</a>
+  <nav aria-label="Categorías">
+    <a href="category.html?cat=running">Running</a>
+    <a href="category.html?cat=trail">Trail</a>
+    <a href="category.html?cat=casual">Casual</a>
+  </nav>
+</header>
+<main>
+<section class="thanks">
+  <h1>Compra confirmada</h1>
+  <p>Pedido <strong id="c-order"></strong>: <span id="c-item"></span>.</p>
+  <a class="btn" href="index.html">Seguir comprando</a>
+</section>
+</main>
+<footer>
+  <button id="dbg-toggle" aria-expanded="false" aria-controls="dbg">Ver parámetros enviados a Target</button>
+  <pre id="dbg"></pre>
+</footer>
+<script src="js/app.js"></script>
+</body>
+</html>
